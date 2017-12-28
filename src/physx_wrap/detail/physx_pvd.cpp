@@ -1,5 +1,5 @@
 #include "physx_pvd.h"
-#include "../log.h"
+#include "log.h"
 
 #define	SAFE_RELEASE(x)	if(x){ x->release(); x = NULL;	}
 

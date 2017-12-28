@@ -18,7 +18,7 @@
 #include <geometry/PxHeightFieldDesc.h>
 #include <extensions/PxExtensionsAPI.h>
 #include <cassert>
-#include "../log.h"
+#include "log.h"
 #include "util.h"
 #include "scene_info_mgr.h"
 

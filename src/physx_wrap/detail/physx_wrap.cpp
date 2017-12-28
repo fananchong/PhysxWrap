@@ -1,6 +1,6 @@
 #include "../physx_wrap.h"
 #include "physx_wrap_impl.h"
-#include "../log.h"
+#include "log.h"
 #include <cassert>
 #include <geometry/PxHeightField.h>
 #include "scene_info_mgr.h"

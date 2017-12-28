@@ -1,6 +1,6 @@
 #include "scene_info_mgr.h"
 #include "util.h"
-#include "../log.h"
+#include "log.h"
 #include <cassert>
 #include <vector>
 
