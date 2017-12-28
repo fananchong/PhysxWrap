@@ -46,7 +46,7 @@ workspace "PhysxWrap"
     
     
 project "PhysxWrap"
-    kind "StaticLib"
+    kind "SharedLib"
     targetname "PhysxWrap"
     files {
         "../src/physx_wrap/**.h",

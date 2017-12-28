@@ -17,6 +17,10 @@ PhysxScene::~PhysxScene() {
 #ifdef _DEBUG
     INFO("call ~PhysxScene()");
 #endif
+    if (mImpl) {
+        delete mImpl;
+        mImpl = nullptr;
+    }
 }
 
 bool PhysxScene::Init(float timestep) {
@@ -126,109 +130,6 @@ void PhysxScene::SetGlobalRotate(uint64_t id, const Quat &rotate) {
     mImpl->SetGlobalRotate(actor, rotate);
 }
 
-ActorInfo PhysxScene::GetActorInfo(uint64_t id) {
-    physx::PxRigidActor* actor = (physx::PxRigidActor*)id;
-    assert(actor->getNbShapes() == 1);
-    physx::PxShape* shapes[1] = { 0 };
-    actor->getShapes((physx::PxShape**)shapes, sizeof(shapes));
-    auto shape = shapes[0];
-
-    ActorInfo ret;
-    ret.SetId(id);
-    ret.SetType(EnumActorType(shape->getGeometryType()));
-    ret.SetPosX(actor->getGlobalPose().p.x);
-    ret.SetPosY(actor->getGlobalPose().p.y);
-    ret.SetPosZ(actor->getGlobalPose().p.z);
-    ret.SetQuatX(actor->getGlobalPose().q.x);
-    ret.SetQuatY(actor->getGlobalPose().q.y);
-    ret.SetQuatZ(actor->getGlobalPose().q.z);
-    ret.SetQuatW(actor->getGlobalPose().q.w);
-
-    switch (shape->getGeometryType()) {
-    case eSPHERE:
-    {
-        auto geom = (physx::PxSphereGeometry*)&shape->getGeometry();
-        ret.SetRadius(geom->radius);
-    } break;
-
-    case ePLANE:
-    {
-        // do nothing
-    } break;
-    case eCAPSULE:
-    {
-        auto geom = (physx::PxCapsuleGeometry*)&shape->getGeometry();
-        ret.SetRadius(geom->radius);
-        ret.SetHalfHeight(geom->halfHeight);
-    } break;
-    case eBOX:
-    {
-        auto geom = (physx::PxBoxGeometry*)&shape->getGeometry();
-        ret.SetHalfExtentsX(geom->halfExtents.x);
-        ret.SetHalfExtentsY(geom->halfExtents.y);
-        ret.SetHalfExtentsZ(geom->halfExtents.z);
-    } break;
-    case eCONVEXMESH:
-    {
-    } break;
-    case eTRIANGLEMESH:
-    {
-        auto geom = (physx::PxTriangleMeshGeometry*)&shape->getGeometry();
-        auto triangleMesh = geom->triangleMesh;
-        std::vector<float> vb;
-        auto vertices = triangleMesh->getVertices();
-        for (size_t i = 0; i < triangleMesh->getNbVertices(); i++)
-        {
-            vb.push_back(vertices[i].x);
-            vb.push_back(vertices[i].y);
-            vb.push_back(vertices[i].z);
-        }
-        ret.SetVB(vb);
-        std::vector<uint16_t> ib;
-        auto triangles = (uint16_t*)triangleMesh->getTriangles();
-        for (size_t i = 0; i < triangleMesh->getNbTriangles() * 3; i++)
-        {
-            ib.push_back(triangles[i]);
-        }
-        ret.SetIB(ib);
-    } break;
-    case eHEIGHTFIELD:
-    {
-        auto geom = (physx::PxHeightFieldGeometry*)&shape->getGeometry();
-        auto heightField = geom->heightField;
-        ret.SetColumns(heightField->getNbColumns());
-        ret.SetRows(heightField->getNbRows());
-        ret.SetColumnScale(geom->columnScale);
-        ret.SetRowScale(geom->rowScale);
-        ret.SetHeightScale(geom->heightScale);
-        std::vector<int16_t> data;
-        for (size_t i = 0; i < heightField->getNbRows(); i++)
-            for (size_t j = 0; j < heightField->getNbColumns(); j++)
-                data.push_back(int16_t(heightField->getHeight(physx::PxReal(i), physx::PxReal(j))));
-        ret.SetHeightFieldData(data);
-    } break;
-    };
-    return ret;
-}
-
-std::vector<uint64_t> PhysxScene::GetActors() {
-    if (mImpl->mScene == nullptr) {
-        return std::vector<uint64_t>();
-    }
-    auto flag = physx::PxActorTypeFlag::eRIGID_STATIC | physx::PxActorTypeFlag::eRIGID_DYNAMIC;
-    uint32_t n = mImpl->mScene->getNbActors(flag);
-    std::vector<uint64_t> ret(n);
-    if (mImpl->mTempVec.size() != n) {
-        mImpl->mTempVec.resize(n);
-    }
-    physx::PxRigidActor** actors = mImpl->mTempVec.data();
-    mImpl->mScene->getActors(flag, (physx::PxActor**)actors, n);
-    for (uint32_t i = 0; i < n; i++) {
-        ret[i] = (uint64_t)actors[i];
-    }
-    return ret;
-}
-
-unsigned GetStaticObjCountInScene(const std::string &path) {
+MY_DLL_EXPORT_FUNC unsigned GetStaticObjCountInScene(const std::string &path) {
     return gSceneInfoMgr->GetStaticObjCount(path);
 }

@@ -1,14 +1,12 @@
 #ifndef __PHYSX_WRAP_H__
 #define __PHYSX_WRAP_H__
 
-#include <memory>
 #include <vector>
-#include "actor_info.h"
 #include "vector3.h"
 #include "quat.h"
 
 class PhysxSceneImpl;
-class PhysxScene
+class MY_DLL_EXPORT_CLASS PhysxScene
 {
 public:
     PhysxScene();
@@ -42,14 +40,11 @@ public:
     void SetGlobalPostion(uint64_t id, const Vector3 &pos);
     void SetGlobalRotate(uint64_t id, const Quat &rotate);
 
-    ActorInfo GetActorInfo(uint64_t id);
-    std::vector<uint64_t> GetActors();
-
 private:
     void release();
-    std::shared_ptr<PhysxSceneImpl> mImpl;
+    PhysxSceneImpl* mImpl;
 };
 
-unsigned GetStaticObjCountInScene(const std::string &path);
+MY_DLL_EXPORT_FUNC unsigned GetStaticObjCountInScene(const std::string &path);
 
 #endif

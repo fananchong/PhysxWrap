@@ -19,7 +19,7 @@
 #include <extensions/PxExtensionsAPI.h>
 #include <cassert>
 #include "../log.h"
-#include "../util.h"
+#include "util.h"
 #include "scene_info_mgr.h"
 
 #ifdef _MSC_VER

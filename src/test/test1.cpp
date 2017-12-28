@@ -1,7 +1,7 @@
 #include <physx_wrap.h>
 #include <iostream>
 #include <fstream>
-#include <util.h>
+#include "util.h"
 
 void createTestHeightField(PhysxScene& scene, const std::string &path) {
     std::string content = GetFileContent(path);

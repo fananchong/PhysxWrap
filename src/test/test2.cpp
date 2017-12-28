@@ -1,7 +1,7 @@
 #include <physx_wrap.h>
 #include <string>
 #include <iostream>
-#include <util.h>
+#include "util.h"
 
 void Test2(PhysxScene& scene, const std::string &path) {
     auto t1 = GetTimeStamp();
