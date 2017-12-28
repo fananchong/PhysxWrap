@@ -10,6 +10,8 @@
 #include <atomic>
 #include <vector>
 #include "physx_pvd.h"
+#include "../vector3.h"
+#include "../quat.h"
 
 class PhysxSceneImpl
 {
@@ -21,21 +23,27 @@ public:
     void CreateScene(const std::string &path);
     void Update();
     physx::PxRigidActor* CreatePlane(float xNormal, float yNormal, float zNormal, float distance);
-    physx::PxRigidActor* CreateHeightField(const std::vector<int16_t> &heightmap, unsigned columns, unsigned rows, float columnScale, float rowScale, float heightScale);
-    physx::PxRigidActor* CreateBoxDynamic(float posX, float posY, float posZ, float halfExtentsX, float halfExtentsY, float halfExtentsZ, float density);
-    physx::PxRigidActor* CreateBoxKinematic(float posX, float posY, float posZ, float halfExtentsX, float halfExtentsY, float halfExtentsZ, float density);
-    physx::PxRigidActor* CreateBoxStatic(float posX, float posY, float posZ, float halfExtentsX, float halfExtentsY, float halfExtentsZ);
-    physx::PxRigidActor* CreateSphereDynamic(float posX, float posY, float posZ, float radius, float density);
-    physx::PxRigidActor* CreateSphereKinematic(float posX, float posY, float posZ, float radius, float density);
-    physx::PxRigidActor* CreateSphereStatic(float posX, float posY, float posZ, float radius);
-    physx::PxRigidActor* CreateCapsuleDynamic(float posX, float posY, float posZ, float radius, float halfHeight, float density);
-    physx::PxRigidActor* CreateCapsuleKinematic(float posX, float posY, float posZ, float radius, float halfHeight, float density);
-    physx::PxRigidActor* CreateCapsuleStatic(float posX, float posY, float posZ, float radius, float halfHeight);
-    physx::PxRigidActor* CreateMeshKinematic(float posX, float posY, float posZ, float scaleX, float scaleY, float scaleZ, const std::vector<float> &vb, const std::vector<uint16_t> &ib, float density);
-    physx::PxRigidActor* CreateMeshStatic(float posX, float posY, float posZ, float scaleX, float scaleY, float scaleZ, const std::vector<float> &vb, const std::vector<uint16_t> &ib);
+    physx::PxRigidActor* CreateHeightField(const std::vector<int16_t> &heightmap, unsigned columns, unsigned rows, const Vector3 &scale);
+    physx::PxRigidActor* CreateBoxDynamic(const Vector3 &pos, const Vector3 &halfExtents, float density);
+    physx::PxRigidActor* CreateBoxKinematic(const Vector3 &pos, const Vector3 &halfExtents, float density);
+    physx::PxRigidActor* CreateBoxStatic(const Vector3 &pos, const Vector3 &halfExtents);
+    physx::PxRigidActor* CreateSphereDynamic(const Vector3 &pos, float radius, float density);
+    physx::PxRigidActor* CreateSphereKinematic(const Vector3 &pos, float radius, float density);
+    physx::PxRigidActor* CreateSphereStatic(const Vector3 &pos, float radius);
+    physx::PxRigidActor* CreateCapsuleDynamic(const Vector3 &pos, float radius, float halfHeight, float density);
+    physx::PxRigidActor* CreateCapsuleKinematic(const Vector3 &pos, float radius, float halfHeight, float density);
+    physx::PxRigidActor* CreateCapsuleStatic(const Vector3 &pos, float radius, float halfHeight);
+    physx::PxRigidActor* CreateMeshKinematic(const Vector3 &pos, const Vector3 &scale, const std::vector<float> &vb, const std::vector<uint16_t> &ib, float density);
+    physx::PxRigidActor* CreateMeshStatic(const Vector3 &pos, const Vector3 &scale, const std::vector<float> &vb, const std::vector<uint16_t> &ib);
 
-    void SetGlobalPostion(physx::PxRigidActor* actor, float posX, float posY, float posZ);
-    void SetGlobalRotate(physx::PxRigidActor* actor, float rotateX, float rotateY, float rotateZ, float rotateW);
+    void SetLinearVelocity(physx::PxRigidActor* actor, const Vector3 &velocity);
+    void AddForce(physx::PxRigidActor* actor, const Vector3 &force);
+    void ClearForce(physx::PxRigidActor* actor);
+
+    Vector3 GetGlobalPostion(physx::PxRigidActor* actor);
+    Quat GetGlobalRotate(physx::PxRigidActor* actor);
+    void SetGlobalPostion(physx::PxRigidActor* actor, const Vector3 &pos);
+    void SetGlobalRotate(physx::PxRigidActor* actor, const Quat &rotate);
 
 protected:
     virtual void customizeTolerances(physx::PxTolerancesScale&) {}

@@ -43,62 +43,87 @@ uint64_t PhysxScene::CreatePlane(float yAxis) {
     return (uint64_t)mImpl->CreatePlane(0, 1, 0, yAxis);
 }
 
-uint64_t PhysxScene::CreateHeightField(const std::vector<int16_t> &heightmap, unsigned columns, unsigned rows, float columnScale, float rowScale, float heightScale) {
-    return (uint64_t)mImpl->CreateHeightField(heightmap, columns, rows, columnScale, rowScale, heightScale);
+uint64_t PhysxScene::CreateHeightField(const std::vector<int16_t> &heightmap, unsigned columns, unsigned rows, const Vector3 &scale) {
+    return (uint64_t)mImpl->CreateHeightField(heightmap, columns, rows, scale);
 }
 
-uint64_t PhysxScene::CreateBoxDynamic(float posX, float posY, float posZ, float halfExtentsX, float halfExtentsY, float halfExtentsZ) {
-    return (uint64_t)mImpl->CreateBoxDynamic(posX, posY, posZ, halfExtentsX, halfExtentsY, halfExtentsZ, DEFAULT_DENSITY);
+uint64_t PhysxScene::CreateBoxDynamic(const Vector3 &pos, const Vector3 &halfExtents) {
+    return (uint64_t)mImpl->CreateBoxDynamic(pos, halfExtents, DEFAULT_DENSITY);
 }
 
-uint64_t PhysxScene::CreateBoxKinematic(float posX, float posY, float posZ, float halfExtentsX, float halfExtentsY, float halfExtentsZ) {
-    return (uint64_t)mImpl->CreateBoxKinematic(posX, posY, posZ, halfExtentsX, halfExtentsY, halfExtentsZ, DEFAULT_DENSITY);
+uint64_t PhysxScene::CreateBoxKinematic(const Vector3 &pos, const Vector3 &halfExtents) {
+    return (uint64_t)mImpl->CreateBoxKinematic(pos, halfExtents, DEFAULT_DENSITY);
 }
 
-uint64_t PhysxScene::CreateBoxStatic(float posX, float posY, float posZ, float halfExtentsX, float halfExtentsY, float halfExtentsZ) {
-    return (uint64_t)mImpl->CreateBoxStatic(posX, posY, posZ, halfExtentsX, halfExtentsY, halfExtentsZ);
+uint64_t PhysxScene::CreateBoxStatic(const Vector3 &pos, const Vector3 &halfExtents) {
+    return (uint64_t)mImpl->CreateBoxStatic(pos, halfExtents);
 }
 
-uint64_t PhysxScene::CreateSphereDynamic(float posX, float posY, float posZ, float radius) {
-    return (uint64_t)mImpl->CreateSphereDynamic(posX, posY, posZ, radius, DEFAULT_DENSITY);
+uint64_t PhysxScene::CreateSphereDynamic(const Vector3 &pos, float radius) {
+    return (uint64_t)mImpl->CreateSphereDynamic(pos, radius, DEFAULT_DENSITY);
 }
 
-uint64_t PhysxScene::CreateSphereKinematic(float posX, float posY, float posZ, float radius) {
-    return (uint64_t)mImpl->CreateSphereKinematic(posX, posY, posZ, radius, DEFAULT_DENSITY);
+uint64_t PhysxScene::CreateSphereKinematic(const Vector3 &pos, float radius) {
+    return (uint64_t)mImpl->CreateSphereKinematic(pos, radius, DEFAULT_DENSITY);
 }
 
-uint64_t PhysxScene::CreateSphereStatic(float posX, float posY, float posZ, float radius) {
-    return (uint64_t)mImpl->CreateSphereStatic(posX, posY, posZ, radius);
+uint64_t PhysxScene::CreateSphereStatic(const Vector3 &pos, float radius) {
+    return (uint64_t)mImpl->CreateSphereStatic(pos, radius);
 }
 
-uint64_t PhysxScene::CreateCapsuleDynamic(float posX, float posY, float posZ, float radius, float halfHeight) {
-    return (uint64_t)mImpl->CreateCapsuleDynamic(posX, posY, posZ, radius, halfHeight, DEFAULT_DENSITY);
+uint64_t PhysxScene::CreateCapsuleDynamic(const Vector3 &pos, float radius, float halfHeight) {
+    return (uint64_t)mImpl->CreateCapsuleDynamic(pos, radius, halfHeight, DEFAULT_DENSITY);
 }
 
-uint64_t PhysxScene::CreateCapsuleKinematic(float posX, float posY, float posZ, float radius, float halfHeight) {
-    return (uint64_t)mImpl->CreateCapsuleKinematic(posX, posY, posZ, radius, halfHeight, DEFAULT_DENSITY);
+uint64_t PhysxScene::CreateCapsuleKinematic(const Vector3 &pos, float radius, float halfHeight) {
+    return (uint64_t)mImpl->CreateCapsuleKinematic(pos, radius, halfHeight, DEFAULT_DENSITY);
 }
 
-uint64_t PhysxScene::CreateCapsuleStatic(float posX, float posY, float posZ, float radius, float halfHeight) {
-    return (uint64_t)mImpl->CreateCapsuleStatic(posX, posY, posZ, radius, halfHeight);
+uint64_t PhysxScene::CreateCapsuleStatic(const Vector3 &pos, float radius, float halfHeight) {
+    return (uint64_t)mImpl->CreateCapsuleStatic(pos, radius, halfHeight);
 }
 
-uint64_t PhysxScene::CreateMeshKinematic(float posX, float posY, float posZ, float scaleX, float scaleY, float scaleZ, const std::vector<float> &vb, const std::vector<uint16_t> &ib) {
-    return (uint64_t)mImpl->CreateMeshKinematic(posX, posY, posZ, scaleX, scaleY, scaleZ, vb, ib, DEFAULT_DENSITY);
+uint64_t PhysxScene::CreateMeshKinematic(const Vector3 &pos, const Vector3 &scale, const std::vector<float> &vb, const std::vector<uint16_t> &ib) {
+    return (uint64_t)mImpl->CreateMeshKinematic(pos, scale, vb, ib, DEFAULT_DENSITY);
 }
 
-uint64_t PhysxScene::CreateMeshStatic(float posX, float posY, float posZ, float scaleX, float scaleY, float scaleZ, const std::vector<float> &vb, const std::vector<uint16_t> &ib) {
-    return (uint64_t)mImpl->CreateMeshStatic(posX, posY, posZ, scaleX, scaleY, scaleZ, vb, ib);
+uint64_t PhysxScene::CreateMeshStatic(const Vector3 &pos, const Vector3 &scale, const std::vector<float> &vb, const std::vector<uint16_t> &ib) {
+    return (uint64_t)mImpl->CreateMeshStatic(pos, scale, vb, ib);
 }
 
-void PhysxScene::SetGlobalPostion(uint64_t id, float posX, float posY, float posZ) {
+void PhysxScene::SetLinearVelocity(uint64_t id, const Vector3 &velocity) {
     physx::PxRigidActor* actor = (physx::PxRigidActor*)id;
-    mImpl->SetGlobalPostion(actor, posX, posY, posZ);
+    mImpl->SetLinearVelocity(actor, velocity);
 }
 
-void PhysxScene::SetGlobalRotate(uint64_t id, float rotateX, float rotateY, float rotateZ, float rotateW) {
+void PhysxScene::AddForce(uint64_t id, const Vector3 &force) {
     physx::PxRigidActor* actor = (physx::PxRigidActor*)id;
-    mImpl->SetGlobalRotate(actor, rotateX, rotateY, rotateZ, rotateW);
+    mImpl->AddForce(actor, force);
+}
+
+void PhysxScene::ClearForce(uint64_t id) {
+    physx::PxRigidActor* actor = (physx::PxRigidActor*)id;
+    mImpl->ClearForce(actor);
+}
+
+Vector3 PhysxScene::GetGlobalPostion(uint64_t id) {
+    physx::PxRigidActor* actor = (physx::PxRigidActor*)id;
+    return mImpl->GetGlobalPostion(actor);
+}
+
+Quat PhysxScene::GetGlobalRotate(uint64_t id) {
+    physx::PxRigidActor* actor = (physx::PxRigidActor*)id;
+    return mImpl->GetGlobalRotate(actor);
+}
+
+void PhysxScene::SetGlobalPostion(uint64_t id, const Vector3 &pos) {
+    physx::PxRigidActor* actor = (physx::PxRigidActor*)id;
+    mImpl->SetGlobalPostion(actor, pos);
+}
+
+void PhysxScene::SetGlobalRotate(uint64_t id, const Quat &rotate) {
+    physx::PxRigidActor* actor = (physx::PxRigidActor*)id;
+    mImpl->SetGlobalRotate(actor, rotate);
 }
 
 ActorInfo PhysxScene::GetActorInfo(uint64_t id) {

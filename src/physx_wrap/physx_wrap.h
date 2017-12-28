@@ -20,24 +20,27 @@ public:
     void Update();
 
     uint64_t CreatePlane(float yAxis);
-    uint64_t CreateHeightField(const std::vector<int16_t> &heightmap, unsigned columns, unsigned rows, float columnScale, float rowScale, float heightScale);
-    uint64_t CreateBoxDynamic(float posX, float posY, float posZ, float halfExtentsX, float halfExtentsY, float halfExtentsZ);
-    uint64_t CreateBoxKinematic(float posX, float posY, float posZ, float halfExtentsX, float halfExtentsY, float halfExtentsZ);
-    uint64_t CreateBoxStatic(float posX, float posY, float posZ, float halfExtentsX, float halfExtentsY, float halfExtentsZ);
-    uint64_t CreateSphereDynamic(float posX, float posY, float posZ, float radius);
-    uint64_t CreateSphereKinematic(float posX, float posY, float posZ, float radius);
-    uint64_t CreateSphereStatic(float posX, float posY, float posZ, float radius);
-    uint64_t CreateCapsuleDynamic(float posX, float posY, float posZ, float radius, float halfHeight);
-    uint64_t CreateCapsuleKinematic(float posX, float posY, float posZ, float radius, float halfHeight);
-    uint64_t CreateCapsuleStatic(float posX, float posY, float posZ, float radius, float halfHeight);
-    uint64_t CreateMeshKinematic(float posX, float posY, float posZ, float scaleX, float scaleY, float scaleZ, const std::vector<float> &vb, const std::vector<uint16_t> &ib);
-    uint64_t CreateMeshStatic(float posX, float posY, float posZ, float scaleX, float scaleY, float scaleZ, const std::vector<float> &vb, const std::vector<uint16_t> &ib);
+    uint64_t CreateHeightField(const std::vector<int16_t> &heightmap, unsigned columns, unsigned rows, const Vector3 &scale);
+    uint64_t CreateBoxDynamic(const Vector3 &pos, const Vector3 &halfExtents);
+    uint64_t CreateBoxKinematic(const Vector3 &pos, const Vector3 &halfExtents);
+    uint64_t CreateBoxStatic(const Vector3 &pos, const Vector3 &halfExtents);
+    uint64_t CreateSphereDynamic(const Vector3 &pos, float radius);
+    uint64_t CreateSphereKinematic(const Vector3 &pos, float radius);
+    uint64_t CreateSphereStatic(const Vector3 &pos, float radius);
+    uint64_t CreateCapsuleDynamic(const Vector3 &pos, float radius, float halfHeight);
+    uint64_t CreateCapsuleKinematic(const Vector3 &pos, float radius, float halfHeight);
+    uint64_t CreateCapsuleStatic(const Vector3 &pos, float radius, float halfHeight);
+    uint64_t CreateMeshKinematic(const Vector3 &pos, const Vector3 &scale, const std::vector<float> &vb, const std::vector<uint16_t> &ib);
+    uint64_t CreateMeshStatic(const Vector3 &pos, const Vector3 &scale, const std::vector<float> &vb, const std::vector<uint16_t> &ib);
 
-    //void SetLinearVelocity(float velocityX, float velocityY, float velocityZ);
+    void SetLinearVelocity(uint64_t id, const Vector3 &velocity);
+    void AddForce(uint64_t id, const Vector3 &force);
+    void ClearForce(uint64_t id);
 
-
-    void SetGlobalPostion(uint64_t id, float posX, float posY, float posZ);
-    void SetGlobalRotate(uint64_t id, float rotateX, float rotateY, float rotateZ, float rotateW);
+    Vector3 GetGlobalPostion(uint64_t id);
+    Quat GetGlobalRotate(uint64_t id);
+    void SetGlobalPostion(uint64_t id, const Vector3 &pos);
+    void SetGlobalRotate(uint64_t id, const Quat &rotate);
 
     ActorInfo GetActorInfo(uint64_t id);
     std::vector<uint64_t> GetActors();

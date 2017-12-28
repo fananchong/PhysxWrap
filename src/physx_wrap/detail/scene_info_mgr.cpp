@@ -111,11 +111,11 @@ void SceneInfo::parseMesh1(char* &pcontent) {
 void SceneInfo::parseBox(char* &pcontent) {
     BoxInfo info;
     parseObjBaseInfo(pcontent, &info);
-    info.xHalf = *(float*)pcontent;
+    info.Half.X = *(float*)pcontent;
     pcontent += sizeof(float);
-    info.yHalf = *(float*)pcontent;
+    info.Half.Y = *(float*)pcontent;
     pcontent += sizeof(float);
-    info.zHalf = *(float*)pcontent;
+    info.Half.Z = *(float*)pcontent;
     pcontent += sizeof(float);
     Boxs.emplace_back(info);
 }
@@ -145,28 +145,21 @@ void SceneInfo::parseMesh2(char* &pcontent) {
     if (meshIndex < Meshs.size())
     {
         auto &info = Meshs[meshIndex];
-        info.xPostion = baseInfo.xPostion;
-        info.yPostion = baseInfo.yPostion;
-        info.zPostion = baseInfo.zPostion;
-        info.xRotate = baseInfo.xRotate;
-        info.yRotate = baseInfo.yRotate;
-        info.zRotate = baseInfo.zRotate;
-        info.wRotate = baseInfo.wRotate;
+        info.Postion = baseInfo.Postion;
+        info.Rotate = baseInfo.Rotate;
         info.layer = baseInfo.layer;
-        info.xScale = xScale;
-        info.yScale = yScale;
-        info.zScale = zScale;
+        info.Scale = Vector3{ xScale,yScale,zScale };
     }
 }
 
 void SceneInfo::parseTerrain(char* &pcontent) {
     TerrainInfo info;
     parseObjBaseInfo(pcontent, &info);
-    info.xSize = *(float*)pcontent;
+    info.Size.X = *(float*)pcontent;
     pcontent += sizeof(float);
-    info.ySize = *(float*)pcontent;
+    info.Size.Y = *(float*)pcontent;
     pcontent += sizeof(float);
-    info.zSize = *(float*)pcontent;
+    info.Size.Z = *(float*)pcontent;
     pcontent += sizeof(float);
     info.d = *(uint32_t*)pcontent;
     pcontent += sizeof(uint32_t);
@@ -176,7 +169,7 @@ void SceneInfo::parseTerrain(char* &pcontent) {
         {
             float v = *(float*)pcontent;
             pcontent += sizeof(float);
-            info.data[j*info.d + i] = int16_t(v*info.ySize);
+            info.data[j*info.d + i] = int16_t(v*info.Size.Y);
         }
     Terrains.emplace_back(info);
 }
@@ -190,19 +183,19 @@ void SceneInfo::parseSphere(char* &pcontent) {
 }
 
 void SceneInfo::parseObjBaseInfo(char* &pcontent, ObjInfoBase *infobase) {
-    infobase->xPostion = *(float*)pcontent;
+    infobase->Postion.X = *(float*)pcontent;
     pcontent += sizeof(float);
-    infobase->yPostion = *(float*)pcontent;
+    infobase->Postion.Y = *(float*)pcontent;
     pcontent += sizeof(float);
-    infobase->zPostion = *(float*)pcontent;
+    infobase->Postion.Z = *(float*)pcontent;
     pcontent += sizeof(float);
-    infobase->xRotate = *(float*)pcontent;
+    infobase->Rotate.X = *(float*)pcontent;
     pcontent += sizeof(float);
-    infobase->yRotate = *(float*)pcontent;
+    infobase->Rotate.Y = *(float*)pcontent;
     pcontent += sizeof(float);
-    infobase->zRotate = *(float*)pcontent;
+    infobase->Rotate.Z = *(float*)pcontent;
     pcontent += sizeof(float);
-    infobase->wRotate = *(float*)pcontent;
+    infobase->Rotate.W = *(float*)pcontent;
     pcontent += sizeof(float);
     infobase->layer = *(unsigned char*)pcontent;
     pcontent += sizeof(unsigned char);

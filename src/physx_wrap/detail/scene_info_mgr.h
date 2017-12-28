@@ -4,6 +4,8 @@
 #include <unordered_map>
 #include <string>
 #include <memory>
+#include "../vector3.h"
+#include "../quat.h"
 
 enum {
     eMeshData = 1,
@@ -15,13 +17,8 @@ enum {
 };
 
 struct ObjInfoBase {
-    float xPostion;
-    float yPostion;
-    float zPostion;
-    float xRotate;
-    float yRotate;
-    float zRotate;
-    float wRotate;
+    Vector3 Postion;
+    Quat Rotate;
     unsigned char layer;
 };
 
@@ -30,17 +27,13 @@ class MeshInfo : public ObjInfoBase
 public:
     std::vector<float> vb;
     std::vector<uint16_t> ib;
-    float xScale;
-    float yScale;
-    float zScale;
+    Vector3 Scale;
 };
 
 class BoxInfo : public ObjInfoBase
 {
 public:
-    float xHalf;
-    float yHalf;
-    float zHalf;
+    Vector3 Half;
 };
 
 class CapsuleInfo : public ObjInfoBase
@@ -53,9 +46,7 @@ public:
 class TerrainInfo : public ObjInfoBase
 {
 public:
-    float xSize;
-    float ySize;
-    float zSize;
+    Vector3 Size;
     uint32_t d;
     std::vector<int16_t> data;
 };

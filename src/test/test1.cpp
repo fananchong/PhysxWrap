@@ -11,10 +11,10 @@ void createTestHeightField(PhysxScene& scene, const std::string &path) {
     std::vector<int16_t> data;
     for (size_t i = 0; i < columns* rows; i++)
         data.push_back(pdata[i]);
-    scene.CreateHeightField(data, columns, rows, 1.0f / 6.0f, 1.0f / 6.0f, 1 / 12.0f);
+    scene.CreateHeightField(data, columns, rows, Vector3{ 1.0f / 6.0f, 1.0f / 6.0f, 1 / 12.0f });
 }
 
-void createTestMesh(PhysxScene& scene, float posX, float posY, float posZ) {
+void createTestMesh(PhysxScene& scene, const Vector3 &pos) {
     std::vector<float> vdata;
     std::vector<uint16_t> vindex;
 
@@ -54,14 +54,14 @@ void createTestMesh(PhysxScene& scene, float posX, float posY, float posZ) {
     vindex.push_back(3);
     vindex.push_back(1);
 
-    scene.CreateMeshKinematic(posX, posY, posZ, 1, 1, 1, vdata, vindex);
+    scene.CreateMeshKinematic(pos, Vector3{ 1, 1, 1 }, vdata, vindex);
 }
 
 void Test1(PhysxScene& scene) {
     //scene.CreatePlane(0);
     createTestHeightField(scene, "../../res/hightmap.data");
-    scene.CreateBoxDynamic(0, 20, 0, 0.5f, 0.5f, 0.5f);
-    scene.CreateSphereDynamic(0, 20, 0, 0.5);
-    scene.CreateCapsuleDynamic(-1.5, 20, 0, 0.5, 0.5);
-    createTestMesh(scene, 1.5f, 20, 0);
+    scene.CreateBoxDynamic(Vector3{ 0, 20, 0 }, Vector3{ 0.5f, 0.5f, 0.5f });
+    scene.CreateSphereDynamic(Vector3{ 0, 20, 0 }, 0.5);
+    scene.CreateCapsuleDynamic(Vector3{ -1.5, 20, 0 }, 0.5, 0.5);
+    createTestMesh(scene, Vector3{ 1.5f, 20, 0 });
 }
