@@ -18,7 +18,7 @@ public:
     PhysxSceneImpl();
     ~PhysxSceneImpl();
 
-    bool Init(float timestep, bool supportPVD, const std::string &ip, unsigned port, unsigned timeout, bool useFullPvdConnection);
+    bool Init(float timestep);
     void CreateScene(const std::string &path);
     void Update();
     physx::PxRigidActor* CreatePlane(float xNormal, float yNormal, float zNormal, float distance);
@@ -51,18 +51,10 @@ protected:
 private:
     void release();
 
-    physx::PxFoundation* mFoundation;
-    physx::PxPhysics* mPhysicsSDK;
-    physx::PxCooking* mCooking;
     physx::PxScene* mScene;
     physx::PxDefaultCpuDispatcher* mCpuDispatcher;
-    physx::PxMaterial* mMaterial;
     std::vector<physx::PxRigidActor*> mPhysicsActors;
-    std::atomic_bool mInit;
     float mTimestep;
-
-    bool mSupportPVD;
-    PhysxPVD mPVD;
 
     std::vector<physx::PxRigidActor*> mTempVec;
     unsigned long mPreUpdateTime;

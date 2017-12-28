@@ -26,10 +26,6 @@ workspace "PhysxWrap"
         }
     filter { }
     
-    defines {
-        "EXPORT_DLL"
-    }
-    
     filter "configurations:Debug"
     defines { "_DEBUG" }
     symbols "On"
@@ -50,13 +46,22 @@ workspace "PhysxWrap"
     
     
 project "PhysxWrap"
-    kind "SharedLib"
+    kind "StaticLib"
     targetname "PhysxWrap"
     files {
         "../src/physx_wrap/**.h",
         "../src/physx_wrap/**.c",
         "../src/physx_wrap/**.hpp",
         "../src/physx_wrap/**.cpp",
+    }
+    
+    
+project "PhysxWrapGo"
+    kind "SharedLib"
+    targetname "PhysxWrap"
+    files {
+        "../src/physx_wrap_go/**.h",
+        "../src/physx_wrap_go/**.c",
     }
         
 project "test"

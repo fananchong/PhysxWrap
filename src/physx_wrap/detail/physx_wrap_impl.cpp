@@ -21,6 +21,7 @@
 #include "log.h"
 #include "util.h"
 #include "scene_info_mgr.h"
+#include "physx_sdk.h"
 
 #ifdef _MSC_VER
 #ifdef _DEBUG
@@ -40,26 +41,25 @@
 #endif
 #endif
 
+#ifdef SCENE_SAFE_THREAD
+#define SCENE_LOCK() physx::PxSceneWriteLock scopedLock(*mScene);
+#else
+#define SCENE_LOCK()
+#endif
+
 #define	SAFE_RELEASE(x)	if(x){ x->release(); x = NULL;	}
 #define DEFAULT_RIGID_DYNAMIC(ACTOR)                                                \
     ACTOR->setAngularDamping(0.5f);                                                 \
-    if (mSupportPVD) {                                                              \
-        ACTOR->setActorFlag(physx::PxActorFlag::eVISUALIZATION, true);              \
-    }                                                                               \
     ACTOR->setRigidBodyFlag(physx::PxRigidBodyFlag::eKINEMATIC, false);             \
 
-physx::PxDefaultAllocator gDefaultAllocatorCallback;
-physx::PxDefaultErrorCallback gDefaultErrorCallback;
+#define DEFAULT_RIGID_DYNAMIC_DEBUG(ACTOR)                                          \
+    DEFAULT_RIGID_DYNAMIC(ACTOR)                                                    \
+    ACTOR->setActorFlag(physx::PxActorFlag::eVISUALIZATION, true);                  \
 
 PhysxSceneImpl::PhysxSceneImpl()
-    : mFoundation(nullptr)
-    , mPhysicsSDK(nullptr)
-    , mCooking(nullptr)
-    , mScene(nullptr)
+    : mScene(nullptr)
     , mCpuDispatcher(nullptr)
-    , mInit(false)
     , mTimestep(1.0f / 60.0f)
-    , mSupportPVD(false)
 {
     mPreUpdateTime = GetTimeStamp();
 }
@@ -71,108 +71,52 @@ PhysxSceneImpl::~PhysxSceneImpl() {
 #endif
 }
 
-bool PhysxSceneImpl::Init(float timestep, bool supportPVD, const std::string &ip, unsigned port, unsigned timeout, bool useFullPvdConnection) {
-    if (mInit.load() == false) {
-        mFoundation = PxCreateFoundation(PX_FOUNDATION_VERSION, gDefaultAllocatorCallback, gDefaultErrorCallback);
-        if (!mFoundation) {
-            ERROR("[physx] PxCreateFoundation failed!");
-            release();
-            return false;
-        }
-        mSupportPVD = supportPVD;
-        if (mSupportPVD) {
-            mPVD.Init(mFoundation, ip, port, timeout, useFullPvdConnection);
-            mPVD.CreatePvdConnection();
-        }
-        physx::PxTolerancesScale scale;
-        customizeTolerances(scale);
-        mPhysicsSDK = PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, scale, false, mPVD.GetPvdInstance());
-        if (!mPhysicsSDK) {
-            ERROR("[physx] PxCreatePhysics failed!");
-            release();
-            return false;
-        }
-        if (mSupportPVD) {
-            if (!PxInitExtensions(*mPhysicsSDK, mPVD.GetPvdInstance())) {
-                ERROR("[physx] PxInitExtensions failed!");
-                release();
-                return false;
-            }
-        }
-        mMaterial = mPhysicsSDK->createMaterial(0.5f, 0.5f, 0.1f);
-        if (!mMaterial) {
-            ERROR("[physx] createMaterial failed!");
-            release();
-            return false;
-        }
-
-        physx::PxCookingParams params(scale);
-        params.meshWeldTolerance = 0.001f;
-        params.meshPreprocessParams = physx::PxMeshPreprocessingFlags(physx::PxMeshPreprocessingFlag::eWELD_VERTICES);
-        mCooking = PxCreateCooking(PX_PHYSICS_VERSION, *mFoundation, params);
-        if (!mCooking) {
-            ERROR("[physx] PxCreateCooking failed!");
-            release();
-            return false;
-        }
-
-        physx::PxSceneDesc sceneDesc(mPhysicsSDK->getTolerancesScale());
-        sceneDesc.gravity = physx::PxVec3(0.0f, -9.81f, 0.0f);
-        mCpuDispatcher = physx::PxDefaultCpuDispatcherCreate(0);
-        if (!mCpuDispatcher) {
-            ERROR("PxDefaultCpuDispatcherCreate failed!");
-            release();
-            return false;
-        }
-        sceneDesc.cpuDispatcher = mCpuDispatcher;
-        sceneDesc.filterShader = physx::PxDefaultSimulationFilterShader;
-        sceneDesc.flags |= physx::PxSceneFlag::eENABLE_PCM;
-        sceneDesc.flags |= physx::PxSceneFlag::eENABLE_STABILIZATION;
-        sceneDesc.flags |= physx::PxSceneFlag::eENABLE_ACTIVETRANSFORMS;
-        sceneDesc.flags |= physx::PxSceneFlag::eSUPPRESS_EAGER_SCENE_QUERY_REFIT;
-        customizeSceneDesc(sceneDesc);
-        mScene = mPhysicsSDK->createScene(sceneDesc);
-        if (!mScene) {
-            ERROR("[physx] createScene failed!");
-            release();
-            return false;
-        }
-        if (mSupportPVD) {
-            mScene->setVisualizationParameter(physx::PxVisualizationParameter::eSCALE, 1.0f);
-            mScene->setVisualizationParameter(physx::PxVisualizationParameter::eCOLLISION_SHAPES, 1.0f);
-            physx::PxPvdSceneClient* pvdClient = mScene->getScenePvdClient();
-            if (pvdClient)
-            {
-                pvdClient->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_CONSTRAINTS, true);
-                pvdClient->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
-                pvdClient->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
-            }
-        }
-        mInit.store(true);
-        mTimestep = timestep;
+bool PhysxSceneImpl::Init(float timestep) {
+    physx::PxSceneDesc sceneDesc(gPhysxSDKImpl->GetPhysics()->getTolerancesScale());
+    sceneDesc.gravity = physx::PxVec3(0.0f, -9.81f, 0.0f);
+    mCpuDispatcher = physx::PxDefaultCpuDispatcherCreate(0);
+    if (!mCpuDispatcher) {
+        ERROR("PxDefaultCpuDispatcherCreate failed!");
+        release();
+        return false;
     }
+    sceneDesc.cpuDispatcher = mCpuDispatcher;
+    sceneDesc.filterShader = physx::PxDefaultSimulationFilterShader;
+    sceneDesc.flags |= physx::PxSceneFlag::eENABLE_PCM;
+    sceneDesc.flags |= physx::PxSceneFlag::eENABLE_STABILIZATION;
+    sceneDesc.flags |= physx::PxSceneFlag::eENABLE_ACTIVETRANSFORMS;
+    sceneDesc.flags |= physx::PxSceneFlag::eSUPPRESS_EAGER_SCENE_QUERY_REFIT;
+    customizeSceneDesc(sceneDesc);
+    mScene = gPhysxSDKImpl->GetPhysics()->createScene(sceneDesc);
+    if (!mScene) {
+        ERROR("[physx] createScene failed!");
+        release();
+        return false;
+    }
+#ifdef _DEBUG
+    mScene->setVisualizationParameter(physx::PxVisualizationParameter::eSCALE, 1.0f);
+    mScene->setVisualizationParameter(physx::PxVisualizationParameter::eCOLLISION_SHAPES, 1.0f);
+    physx::PxPvdSceneClient* pvdClient = mScene->getScenePvdClient();
+    if (pvdClient)
+    {
+        pvdClient->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_CONSTRAINTS, true);
+        pvdClient->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
+        pvdClient->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
+    }
+#endif
+    mTimestep = timestep;
     return true;
 }
 
 void PhysxSceneImpl::release() {
-    bool exp = true;
-    if (mInit.compare_exchange_strong(exp, false)) {
-        {
-            physx::PxSceneWriteLock scopedLock(*mScene);
-            for (size_t i = 0; i < mPhysicsActors.size(); ++i)
-                mPhysicsActors[i]->release();
-            mPhysicsActors.clear();
-        }
-        SAFE_RELEASE(mScene);
-        SAFE_RELEASE(mCpuDispatcher);
-        SAFE_RELEASE(mCooking);
-        if (mSupportPVD) {
-            PxCloseExtensions();
-        }
-        SAFE_RELEASE(mPhysicsSDK);
-        mPVD.Close();
-        SAFE_RELEASE(mFoundation);
+    {
+        SCENE_LOCK();
+        for (size_t i = 0; i < mPhysicsActors.size(); ++i)
+            mPhysicsActors[i]->release();
+        mPhysicsActors.clear();
     }
+    SAFE_RELEASE(mScene);
+    SAFE_RELEASE(mCpuDispatcher);
 }
 
 void PhysxSceneImpl::Update() {
@@ -191,8 +135,8 @@ void PhysxSceneImpl::Update() {
 }
 
 physx::PxRigidActor* PhysxSceneImpl::CreatePlane(float xNormal, float yNormal, float zNormal, float distance) {
-    physx::PxSceneWriteLock scopedLock(*mScene);
-    physx::PxRigidStatic* plane = physx::PxCreatePlane(*mPhysicsSDK, physx::PxPlane(physx::PxVec3(zNormal, yNormal, zNormal), distance), *mMaterial);
+    SCENE_LOCK();
+    physx::PxRigidStatic* plane = physx::PxCreatePlane(*gPhysxSDKImpl->GetPhysics(), physx::PxPlane(physx::PxVec3(zNormal, yNormal, zNormal), distance), gPhysxSDKImpl->GetMaterial());
     if (!plane) {
         ERROR("[physx] create plane failed!");
         return nullptr;
@@ -224,7 +168,7 @@ physx::PxRigidActor* PhysxSceneImpl::CreateHeightField(const std::vector<int16_t
     hfDesc.samples.data = samples;
     hfDesc.samples.stride = sizeof(physx::PxHeightFieldSample);
 
-    physx::PxHeightField* heightField = mCooking->createHeightField(hfDesc, mPhysicsSDK->getPhysicsInsertionCallback());
+    physx::PxHeightField* heightField = gPhysxSDKImpl->GetCooking()->createHeightField(hfDesc, gPhysxSDKImpl->GetPhysics()->getPhysicsInsertionCallback());
     if (!heightField) {
         ERROR("[physx] creating the heightfield failed");
         free(samples);
@@ -233,14 +177,14 @@ physx::PxRigidActor* PhysxSceneImpl::CreateHeightField(const std::vector<int16_t
 
     physx::PxTransform pose = physx::PxTransform(physx::PxIdentity);
     pose.p = physx::PxVec3(-(float(columns) / 2 * scale.X), 0, -(float(rows) / 2 * scale.Z));
-    physx::PxRigidStatic* hfActor = mPhysicsSDK->createRigidStatic(pose);
+    physx::PxRigidStatic* hfActor = gPhysxSDKImpl->GetPhysics()->createRigidStatic(pose);
     if (!hfActor) {
         ERROR("[physx] creating heightfield actor failed");
         free(samples);
         return nullptr;
     }
     physx::PxHeightFieldGeometry hfGeom(heightField, physx::PxMeshGeometryFlags(), scale.Y, scale.Z, scale.X);
-    physx::PxShape* hfShape = physx::PxRigidActorExt::createExclusiveShape(*hfActor, hfGeom, *mMaterial);
+    physx::PxShape* hfShape = physx::PxRigidActorExt::createExclusiveShape(*hfActor, hfGeom, gPhysxSDKImpl->GetMaterial());
     if (!hfShape) {
         ERROR("[physx] creating heightfield shape failed");
         free(samples);
@@ -253,21 +197,25 @@ physx::PxRigidActor* PhysxSceneImpl::CreateHeightField(const std::vector<int16_t
 }
 
 physx::PxRigidActor* PhysxSceneImpl::CreateBoxDynamic(const Vector3 &pos, const Vector3 &halfExtents, float density) {
-    physx::PxSceneWriteLock scopedLock(*mScene);
-    physx::PxRigidDynamic* box = PxCreateDynamic(*mPhysicsSDK, physx::PxTransform(pos.X, pos.Y, pos.Z), physx::PxBoxGeometry(halfExtents.X, halfExtents.Y, halfExtents.Z), *mMaterial, density);
+    SCENE_LOCK();
+    physx::PxRigidDynamic* box = PxCreateDynamic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), physx::PxBoxGeometry(halfExtents.X, halfExtents.Y, halfExtents.Z), gPhysxSDKImpl->GetMaterial(), density);
     if (!box) {
         ERROR("[physx] create dynamic box failed!");
         return nullptr;
     }
+#ifdef _DEBUG
+    DEFAULT_RIGID_DYNAMIC_DEBUG(box);
+#else
     DEFAULT_RIGID_DYNAMIC(box);
+#endif
     mScene->addActor(*box);
     mPhysicsActors.push_back(box);
     return box;
 }
 
 physx::PxRigidActor* PhysxSceneImpl::CreateBoxKinematic(const Vector3 &pos, const Vector3 &halfExtents, float density) {
-    physx::PxSceneWriteLock scopedLock(*mScene);
-    physx::PxRigidDynamic* box = PxCreateKinematic(*mPhysicsSDK, physx::PxTransform(pos.X, pos.Y, pos.Z), physx::PxBoxGeometry(halfExtents.X, halfExtents.Y, halfExtents.Z), *mMaterial, density);
+    SCENE_LOCK();
+    physx::PxRigidDynamic* box = PxCreateKinematic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), physx::PxBoxGeometry(halfExtents.X, halfExtents.Y, halfExtents.Z), gPhysxSDKImpl->GetMaterial(), density);
     if (!box) {
         ERROR("[physx] create kinematic box failed!");
         return nullptr;
@@ -278,8 +226,8 @@ physx::PxRigidActor* PhysxSceneImpl::CreateBoxKinematic(const Vector3 &pos, cons
 }
 
 physx::PxRigidActor* PhysxSceneImpl::CreateBoxStatic(const Vector3 &pos, const Vector3 &halfExtents) {
-    physx::PxSceneWriteLock scopedLock(*mScene);
-    physx::PxRigidStatic* box = PxCreateStatic(*mPhysicsSDK, physx::PxTransform(pos.X, pos.Y, pos.Z), physx::PxBoxGeometry(halfExtents.X, halfExtents.Y, halfExtents.Z), *mMaterial);
+    SCENE_LOCK();
+    physx::PxRigidStatic* box = PxCreateStatic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), physx::PxBoxGeometry(halfExtents.X, halfExtents.Y, halfExtents.Z), gPhysxSDKImpl->GetMaterial());
     if (!box) {
         ERROR("[physx] create static box failed!");
         return nullptr;
@@ -290,21 +238,25 @@ physx::PxRigidActor* PhysxSceneImpl::CreateBoxStatic(const Vector3 &pos, const V
 }
 
 physx::PxRigidActor* PhysxSceneImpl::CreateSphereDynamic(const Vector3 &pos, float radius, float density) {
-    physx::PxSceneWriteLock scopedLock(*mScene);
-    physx::PxRigidDynamic* sphere = PxCreateDynamic(*mPhysicsSDK, physx::PxTransform(pos.X, pos.Y, pos.Z), physx::PxSphereGeometry(radius), *mMaterial, density);
+    SCENE_LOCK();
+    physx::PxRigidDynamic* sphere = PxCreateDynamic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), physx::PxSphereGeometry(radius), gPhysxSDKImpl->GetMaterial(), density);
     if (!sphere) {
         ERROR("[physx] create dynamic sphere failed!");
         return nullptr;
     }
+#ifdef _DEBUG
+    DEFAULT_RIGID_DYNAMIC_DEBUG(sphere);
+#else
     DEFAULT_RIGID_DYNAMIC(sphere);
+#endif
     mScene->addActor(*sphere);
     mPhysicsActors.push_back(sphere);
     return sphere;
 }
 
 physx::PxRigidActor* PhysxSceneImpl::CreateSphereKinematic(const Vector3 &pos, float radius, float density) {
-    physx::PxSceneWriteLock scopedLock(*mScene);
-    physx::PxRigidDynamic* sphere = PxCreateKinematic(*mPhysicsSDK, physx::PxTransform(pos.X, pos.Y, pos.Z), physx::PxSphereGeometry(radius), *mMaterial, density);
+    SCENE_LOCK();
+    physx::PxRigidDynamic* sphere = PxCreateKinematic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), physx::PxSphereGeometry(radius), gPhysxSDKImpl->GetMaterial(), density);
     if (!sphere) {
         ERROR("[physx] create kinematic sphere failed!");
         return nullptr;
@@ -315,8 +267,8 @@ physx::PxRigidActor* PhysxSceneImpl::CreateSphereKinematic(const Vector3 &pos, f
 }
 
 physx::PxRigidActor*  PhysxSceneImpl::CreateSphereStatic(const Vector3 &pos, float radius) {
-    physx::PxSceneWriteLock scopedLock(*mScene);
-    physx::PxRigidStatic* sphere = PxCreateStatic(*mPhysicsSDK, physx::PxTransform(pos.X, pos.Y, pos.Z), physx::PxSphereGeometry(radius), *mMaterial);
+    SCENE_LOCK();
+    physx::PxRigidStatic* sphere = PxCreateStatic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), physx::PxSphereGeometry(radius), gPhysxSDKImpl->GetMaterial());
     if (!sphere) {
         ERROR("[physx] create static sphere failed!");
         return nullptr;
@@ -327,21 +279,25 @@ physx::PxRigidActor*  PhysxSceneImpl::CreateSphereStatic(const Vector3 &pos, flo
 }
 
 physx::PxRigidActor* PhysxSceneImpl::CreateCapsuleDynamic(const Vector3 &pos, float radius, float halfHeight, float density) {
-    physx::PxSceneWriteLock scopedLock(*mScene);
-    physx::PxRigidDynamic* capsule = PxCreateDynamic(*mPhysicsSDK, physx::PxTransform(pos.X, pos.Y, pos.Z), physx::PxCapsuleGeometry(radius, halfHeight), *mMaterial, density);
+    SCENE_LOCK();
+    physx::PxRigidDynamic* capsule = PxCreateDynamic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), physx::PxCapsuleGeometry(radius, halfHeight), gPhysxSDKImpl->GetMaterial(), density);
     if (!capsule) {
         ERROR("[physx] create dynamic capsule failed!");
         return nullptr;
     }
+#ifdef _DEBUG
+    DEFAULT_RIGID_DYNAMIC_DEBUG(capsule);
+#else
     DEFAULT_RIGID_DYNAMIC(capsule);
+#endif
     mScene->addActor(*capsule);
     mPhysicsActors.push_back(capsule);
     return capsule;
 }
 
 physx::PxRigidActor* PhysxSceneImpl::CreateCapsuleKinematic(const Vector3 &pos, float radius, float halfHeight, float density) {
-    physx::PxSceneWriteLock scopedLock(*mScene);
-    physx::PxRigidDynamic* capsule = PxCreateKinematic(*mPhysicsSDK, physx::PxTransform(pos.X, pos.Y, pos.Z), physx::PxCapsuleGeometry(radius, halfHeight), *mMaterial, density);
+    SCENE_LOCK();
+    physx::PxRigidDynamic* capsule = PxCreateKinematic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), physx::PxCapsuleGeometry(radius, halfHeight), gPhysxSDKImpl->GetMaterial(), density);
     if (!capsule) {
         ERROR("[physx] create kinematic capsule failed!");
         return nullptr;
@@ -352,8 +308,8 @@ physx::PxRigidActor* PhysxSceneImpl::CreateCapsuleKinematic(const Vector3 &pos, 
 }
 
 physx::PxRigidActor* PhysxSceneImpl::CreateCapsuleStatic(const Vector3 &pos, float radius, float halfHeight) {
-    physx::PxSceneWriteLock scopedLock(*mScene);
-    physx::PxRigidStatic* capsule = PxCreateStatic(*mPhysicsSDK, physx::PxTransform(pos.X, pos.Y, pos.Z), physx::PxCapsuleGeometry(radius, halfHeight), *mMaterial);
+    SCENE_LOCK();
+    physx::PxRigidStatic* capsule = PxCreateStatic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), physx::PxCapsuleGeometry(radius, halfHeight), gPhysxSDKImpl->GetMaterial());
     if (!capsule) {
         ERROR("[physx] create static capsule failed!");
         return nullptr;
@@ -364,7 +320,7 @@ physx::PxRigidActor* PhysxSceneImpl::CreateCapsuleStatic(const Vector3 &pos, flo
 }
 
 physx::PxRigidActor* PhysxSceneImpl::CreateMeshKinematic(const Vector3 &pos, const Vector3 &scale, const std::vector<float> &vb, const std::vector<uint16_t> &ib, float density) {
-    physx::PxSceneWriteLock scopedLock(*mScene);
+    SCENE_LOCK();
     physx::PxTriangleMeshDesc meshDesc;
     meshDesc.points.count = physx::PxU32(vb.size() / 3);
     meshDesc.triangles.count = physx::PxU32(ib.size() / 3);
@@ -376,20 +332,20 @@ physx::PxRigidActor* PhysxSceneImpl::CreateMeshKinematic(const Vector3 &pos, con
     meshDesc.flags |= physx::PxMeshFlag::eFLIPNORMALS;
 
     physx::PxDefaultMemoryOutputStream streamout;
-    bool ok = mCooking->cookTriangleMesh(meshDesc, streamout);
+    bool ok = gPhysxSDKImpl->GetCooking()->cookTriangleMesh(meshDesc, streamout);
     if (!ok) {
         ERROR("[physx] cookTriangleMesh fail.");
         return nullptr;
     }
 
     physx::PxDefaultMemoryInputData streamin(streamout.getData(), streamout.getSize());
-    physx::PxTriangleMesh* triangleMesh = mPhysicsSDK->createTriangleMesh(streamin);
+    physx::PxTriangleMesh* triangleMesh = gPhysxSDKImpl->GetPhysics()->createTriangleMesh(streamin);
     if (triangleMesh) {
         physx::PxMeshScale meshScale = physx::PxMeshScale(physx::PxVec3{ scale.X ,scale.Y ,scale.Z }, physx::PxQuat(physx::PxIdentity));
         physx::PxTriangleMeshGeometry triGeom;
         triGeom.triangleMesh = triangleMesh;
         triGeom.scale = meshScale;
-        physx::PxRigidDynamic* mesh = PxCreateKinematic(*mPhysicsSDK, physx::PxTransform(pos.X, pos.Y, pos.Z), triGeom, *mMaterial, density);
+        physx::PxRigidDynamic* mesh = PxCreateKinematic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), triGeom, gPhysxSDKImpl->GetMaterial(), density);
         if (!mesh) {
             ERROR("[physx] create kinematic mesh failed!");
             return nullptr;
@@ -406,7 +362,7 @@ physx::PxRigidActor* PhysxSceneImpl::CreateMeshKinematic(const Vector3 &pos, con
 }
 
 physx::PxRigidActor* PhysxSceneImpl::CreateMeshStatic(const Vector3 &pos, const Vector3 &scale, const std::vector<float> &vb, const std::vector<uint16_t> &ib) {
-    physx::PxSceneWriteLock scopedLock(*mScene);
+    SCENE_LOCK();
     physx::PxTriangleMeshDesc meshDesc;
     meshDesc.points.count = physx::PxU32(vb.size() / 3);
     meshDesc.triangles.count = physx::PxU32(ib.size() / 3);
@@ -418,20 +374,20 @@ physx::PxRigidActor* PhysxSceneImpl::CreateMeshStatic(const Vector3 &pos, const 
     meshDesc.flags |= physx::PxMeshFlag::eFLIPNORMALS;
 
     physx::PxDefaultMemoryOutputStream streamout;
-    bool ok = mCooking->cookTriangleMesh(meshDesc, streamout);
+    bool ok = gPhysxSDKImpl->GetCooking()->cookTriangleMesh(meshDesc, streamout);
     if (!ok) {
         ERROR("[physx] cookTriangleMesh fail.");
         return nullptr;
     }
 
     physx::PxDefaultMemoryInputData streamin(streamout.getData(), streamout.getSize());
-    physx::PxTriangleMesh* triangleMesh = mPhysicsSDK->createTriangleMesh(streamin);
+    physx::PxTriangleMesh* triangleMesh = gPhysxSDKImpl->GetPhysics()->createTriangleMesh(streamin);
     if (triangleMesh) {
         physx::PxMeshScale meshScale = physx::PxMeshScale(physx::PxVec3{ scale.X ,scale.Y ,scale.Z }, physx::PxQuat(physx::PxIdentity));
         physx::PxTriangleMeshGeometry triGeom;
         triGeom.triangleMesh = triangleMesh;
         triGeom.scale = meshScale;
-        physx::PxRigidStatic* mesh = PxCreateStatic(*mPhysicsSDK, physx::PxTransform(pos.X, pos.Y, pos.Z), triGeom, *mMaterial);
+        physx::PxRigidStatic* mesh = PxCreateStatic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), triGeom, gPhysxSDKImpl->GetMaterial());
         if (!mesh) {
             ERROR("[physx] create static mesh failed!");
             return nullptr;

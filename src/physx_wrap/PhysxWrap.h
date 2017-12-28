@@ -33,7 +33,6 @@ public:
     ~PhysxScene();
 
     bool Init(float timestep);
-    bool InitWithPVD(float timestep, const std::string &ip = "127.0.0.1", unsigned port = 5425, unsigned timeout = 10, bool useFullPvdConnection = true);
     void CreateScene(const std::string &path);
     void Update();
 
@@ -66,5 +65,6 @@ private:
 };
 
 MY_DLL_EXPORT_FUNC unsigned GetStaticObjCountInScene(const std::string &path);
+MY_DLL_EXPORT_FUNC bool InitPhysxSDK();
 
 #endif

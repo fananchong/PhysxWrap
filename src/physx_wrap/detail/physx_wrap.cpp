@@ -4,6 +4,7 @@
 #include <cassert>
 #include <geometry/PxHeightField.h>
 #include "scene_info_mgr.h"
+#include "physx_sdk.h"
 
 #define DEFAULT_DENSITY (1.0f)
 
@@ -24,11 +25,7 @@ PhysxScene::~PhysxScene() {
 }
 
 bool PhysxScene::Init(float timestep) {
-    return mImpl->Init(timestep, false, "", 0, 0, false);
-}
-
-bool PhysxScene::InitWithPVD(float timestep, const std::string &ip, unsigned port, unsigned timeout, bool useFullPvdConnection) {
-    return mImpl->Init(timestep, true, ip, port, timeout, useFullPvdConnection);
+    return mImpl->Init(timestep);
 }
 
 void PhysxScene::CreateScene(const std::string &path) {
@@ -132,4 +129,8 @@ void PhysxScene::SetGlobalRotate(uint64_t id, const Quat &rotate) {
 
 MY_DLL_EXPORT_FUNC unsigned GetStaticObjCountInScene(const std::string &path) {
     return gSceneInfoMgr->GetStaticObjCount(path);
+}
+
+MY_DLL_EXPORT_FUNC bool InitPhysxSDK() {
+    return gPhysxSDKImpl->Init();
 }

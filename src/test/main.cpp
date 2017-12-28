@@ -13,12 +13,11 @@ void Test2(PhysxScene& scene, const std::string &path);
 
 int main(int argn, char argv[]) {
 
+    InitPhysxSDK();
+
     PhysxScene scene;
-#ifdef _DEBUG
-    scene.InitWithPVD(1.0f / 60.0f);
-#else
     scene.Init(1.0f / 60.0f);
-#endif
+
     //Test1(scene);
     Test2(scene, "../../res/pxscene");
 

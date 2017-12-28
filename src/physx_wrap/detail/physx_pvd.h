@@ -12,7 +12,7 @@ public:
     PhysxPVD();
     ~PhysxPVD();
 
-    void Init(physx::PxFoundation* foundation, const std::string &ip, unsigned port, unsigned timeout, bool useFullPvdConnection);
+    void Init(physx::PxFoundation* foundation, const std::string &ip = "127.0.0.1", unsigned port = 5425, unsigned timeout = 10, bool useFullPvdConnection = true);
     void CreatePvdConnection();
     void Close();
 
