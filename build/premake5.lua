@@ -26,6 +26,10 @@ workspace "PhysxWrap"
         }
     filter { }
     
+    defines {
+        "EXPORT_DLL"
+    }
+    
     filter "configurations:Debug"
     defines { "_DEBUG" }
     symbols "On"

@@ -1,9 +1,29 @@
 #ifndef __PHYSX_WRAP_H__
 #define __PHYSX_WRAP_H__
 
+#include <string>
 #include <vector>
-#include "vector3.h"
-#include "quat.h"
+
+#ifdef EXPORT_DLL
+#define MY_DLL_EXPORT_CLASS __declspec(dllexport)
+#define MY_DLL_EXPORT_FUNC extern "C" __declspec(dllexport)
+#else
+#define MY_DLL_EXPORT_CLASS
+#define MY_DLL_EXPORT_FUNC
+#endif
+
+struct MY_DLL_EXPORT_CLASS Vector3 {
+    float X;
+    float Y;
+    float Z;
+};
+
+struct MY_DLL_EXPORT_CLASS Quat {
+    float X;
+    float Y;
+    float Z;
+    float W;
+};
 
 class PhysxSceneImpl;
 class MY_DLL_EXPORT_CLASS PhysxScene

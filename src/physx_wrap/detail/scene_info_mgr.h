@@ -4,8 +4,7 @@
 #include <unordered_map>
 #include <string>
 #include <memory>
-#include "../vector3.h"
-#include "../quat.h"
+#include "../physx_wrap.h"
 
 enum {
     eMeshData = 1,

@@ -10,8 +10,7 @@
 #include <atomic>
 #include <vector>
 #include "physx_pvd.h"
-#include "../vector3.h"
-#include "../quat.h"
+#include "../physx_wrap.h"
 
 class PhysxSceneImpl
 {
