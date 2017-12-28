@@ -1,4 +1,4 @@
-#include <physx_wrap.h>
+#include <PhysxWrap.h>
 #include <iostream>
 #include <fstream>
 #include "util.h"

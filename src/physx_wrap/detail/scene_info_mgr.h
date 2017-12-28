@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <string>
 #include <memory>
-#include "../physx_wrap.h"
+#include "../PhysxWrap.h"
 
 enum {
     eMeshData = 1,

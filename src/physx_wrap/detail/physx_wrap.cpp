@@ -1,4 +1,4 @@
-#include "../physx_wrap.h"
+#include "../PhysxWrap.h"
 #include "physx_wrap_impl.h"
 #include "log.h"
 #include <cassert>
