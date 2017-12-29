@@ -4,9 +4,16 @@
 #include <PxPhysics.h>
 #include <foundation/PxFoundation.h>
 #include <cooking/PxCooking.h>
+#include <geometry/PxHeightFieldGeometry.h>
+#include <geometry/PxHeightFieldSample.h>
+#include <geometry/PxHeightFieldDesc.h>
+#include <geometry/PxHeightField.h>
+#include <geometry/PxConvexMeshGeometry.h>
 #include <atomic>
+#include <vector>
 #include "physx_pvd.h"
 #include "physx_sdk.h"
+#include "../PhysxWrap.h"
 
 class PhysxSDKImpl
 {
@@ -35,6 +42,10 @@ private:
     physx::PxMaterial* mMaterial;
     PhysxPVD mPVD;
 };
+
+
+bool GetHeightFieldGeometry(physx::PxHeightFieldGeometry &geom, const std::vector<int16_t> &heightmap, unsigned columns, unsigned rows, const Vector3 &scale);
+bool GetMeshGeometry(physx::PxTriangleMeshGeometry& geom, const Vector3 &pos, const Vector3 &scale, const std::vector<float> &vb, const std::vector<uint16_t> &ib);
 
 extern PhysxSDKImpl* gPhysxSDKImpl;
 

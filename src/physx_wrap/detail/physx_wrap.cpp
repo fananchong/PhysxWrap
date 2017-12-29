@@ -1,10 +1,9 @@
 #include "../PhysxWrap.h"
 #include "physx_wrap_impl.h"
-#include "log.h"
-#include <cassert>
-#include <geometry/PxHeightField.h>
 #include "scene_info_mgr.h"
 #include "physx_sdk.h"
+#include "log.h"
+#include <cassert>
 
 #define DEFAULT_DENSITY (1.0f)
 
@@ -36,8 +35,8 @@ void PhysxScene::release() {
     mImpl->release();
 }
 
-void  PhysxScene::Update() {
-    mImpl->Update();
+void  PhysxScene::Update(float elapsedTime) {
+    mImpl->Update(elapsedTime);
 }
 
 uint64_t PhysxScene::CreatePlane(float yAxis) {

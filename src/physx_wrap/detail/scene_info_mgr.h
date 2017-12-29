@@ -4,6 +4,8 @@
 #include <unordered_map>
 #include <string>
 #include <memory>
+#include <geometry/PxHeightFieldGeometry.h>
+#include <geometry/PxConvexMeshGeometry.h>
 #include "../PhysxWrap.h"
 
 enum {
@@ -18,15 +20,16 @@ enum {
 struct ObjInfoBase {
     Vector3 Postion;
     Quat Rotate;
-    unsigned char layer;
+    unsigned char Layer;
 };
 
 class MeshInfo : public ObjInfoBase
 {
 public:
-    std::vector<float> vb;
-    std::vector<uint16_t> ib;
+    std::vector<float> VB;
+    std::vector<uint16_t> IB;
     Vector3 Scale;
+    physx::PxTriangleMeshGeometry Geom;
 };
 
 class BoxInfo : public ObjInfoBase
@@ -38,22 +41,20 @@ public:
 class CapsuleInfo : public ObjInfoBase
 {
 public:
-    float radius;
-    float halfHeight;
+    float Radius;
+    float HalfHeight;
 };
 
 class TerrainInfo : public ObjInfoBase
 {
 public:
-    Vector3 Size;
-    uint32_t d;
-    std::vector<int16_t> data;
+    physx::PxHeightFieldGeometry Geom;
 };
 
 class SphereInfo : public ObjInfoBase
 {
 public:
-    float radius;
+    float Radius;
 };
 
 class SceneInfo

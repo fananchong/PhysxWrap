@@ -1,0 +1,2 @@
+python g.py
+pause

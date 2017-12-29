@@ -34,7 +34,7 @@ public:
 
     bool Init(float timestep);
     void CreateScene(const std::string &path);
-    void Update();
+    void Update(float elapsedTime); // second
 
     uint64_t CreatePlane(float yAxis);
     uint64_t CreateHeightField(const std::vector<int16_t> &heightmap, unsigned columns, unsigned rows, const Vector3 &scale);

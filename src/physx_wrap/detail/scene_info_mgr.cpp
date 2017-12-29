@@ -1,4 +1,5 @@
 #include "scene_info_mgr.h"
+#include "physx_sdk.h"
 #include "util.h"
 #include "log.h"
 #include <cassert>
@@ -92,9 +93,9 @@ void SceneInfo::parseMesh1(char* &pcontent) {
         pcontent += sizeof(float);
         float z = *(float*)pcontent;
         pcontent += sizeof(float);
-        info.vb.push_back(x);
-        info.vb.push_back(y);
-        info.vb.push_back(z);
+        info.VB.push_back(x);
+        info.VB.push_back(y);
+        info.VB.push_back(z);
     }
     uint32_t ilen = *(uint32_t*)pcontent;
     pcontent += sizeof(uint32_t);
@@ -103,7 +104,7 @@ void SceneInfo::parseMesh1(char* &pcontent) {
     {
         uint16_t v = *(uint16_t*)pcontent;
         pcontent += sizeof(uint16_t);
-        info.ib.push_back(v);
+        info.IB.push_back(v);
     }
     Meshs.emplace_back(info);
 }
@@ -123,9 +124,9 @@ void SceneInfo::parseBox(char* &pcontent) {
 void SceneInfo::parseCapsule(char* &pcontent) {
     CapsuleInfo info;
     parseObjBaseInfo(pcontent, &info);
-    info.radius = *(float*)pcontent;
+    info.Radius = *(float*)pcontent;
     pcontent += sizeof(float);
-    info.halfHeight = *(float*)pcontent;
+    info.HalfHeight = *(float*)pcontent;
     pcontent += sizeof(float);
     Capsules.emplace_back(info);
 }
@@ -147,7 +148,7 @@ void SceneInfo::parseMesh2(char* &pcontent) {
         auto &info = Meshs[meshIndex];
         info.Postion = baseInfo.Postion;
         info.Rotate = baseInfo.Rotate;
-        info.layer = baseInfo.layer;
+        info.Layer = baseInfo.Layer;
         info.Scale = Vector3{ xScale,yScale,zScale };
     }
 }
@@ -155,29 +156,39 @@ void SceneInfo::parseMesh2(char* &pcontent) {
 void SceneInfo::parseTerrain(char* &pcontent) {
     TerrainInfo info;
     parseObjBaseInfo(pcontent, &info);
-    info.Size.X = *(float*)pcontent;
+    Vector3 size;
+    uint32_t d;
+    std::vector<int16_t> data;
+    size.X = *(float*)pcontent;
     pcontent += sizeof(float);
-    info.Size.Y = *(float*)pcontent;
+    size.Y = *(float*)pcontent;
     pcontent += sizeof(float);
-    info.Size.Z = *(float*)pcontent;
+    size.Z = *(float*)pcontent;
     pcontent += sizeof(float);
-    info.d = *(uint32_t*)pcontent;
+    d = *(uint32_t*)pcontent;
     pcontent += sizeof(uint32_t);
-    info.data.resize(info.d*info.d);
-    for (size_t i = 0; i < info.d; i++)
-        for (size_t j = 0; j < info.d; j++)
+    data.resize(d*d);
+    for (size_t i = 0; i < d; i++)
+        for (size_t j = 0; j < d; j++)
         {
             float v = *(float*)pcontent;
             pcontent += sizeof(float);
-            info.data[j*info.d + i] = int16_t(v*info.Size.Y);
+            data[j*d + i] = int16_t(v*size.Y);
         }
-    Terrains.emplace_back(info);
+
+    if (GetHeightFieldGeometry(info.Geom, data, d, d, Vector3{ size.X / (d - 1), 1, size.Y / (d - 1) })) {
+        Terrains.emplace_back(info);
+    }
+    else
+    {
+        assert(false);
+    }
 }
 
 void SceneInfo::parseSphere(char* &pcontent) {
     SphereInfo info;
     parseObjBaseInfo(pcontent, &info);
-    info.radius = *(float*)pcontent;
+    info.Radius = *(float*)pcontent;
     pcontent += sizeof(float);
     Spheres.emplace_back(info);
 }
@@ -197,7 +208,7 @@ void SceneInfo::parseObjBaseInfo(char* &pcontent, ObjInfoBase *infobase) {
     pcontent += sizeof(float);
     infobase->Rotate.W = *(float*)pcontent;
     pcontent += sizeof(float);
-    infobase->layer = *(unsigned char*)pcontent;
+    infobase->Layer = *(unsigned char*)pcontent;
     pcontent += sizeof(unsigned char);
 }
 

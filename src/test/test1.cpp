@@ -5,6 +5,9 @@
 
 void createTestHeightField(PhysxScene& scene, const std::string &path) {
     std::string content = GetFileContent(path);
+    if (content == "") {
+        return;
+    }
     unsigned columns = *(uint32_t *)(content.data());
     unsigned rows = *(uint32_t *)(content.data() + sizeof(uint32_t));
     int16_t *pdata = (int16_t *)(content.data() + 2 * sizeof(uint32_t));

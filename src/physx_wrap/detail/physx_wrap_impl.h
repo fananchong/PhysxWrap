@@ -20,9 +20,10 @@ public:
 
     bool Init(float timestep);
     void CreateScene(const std::string &path);
-    void Update();
+    void Update(float elapsedTime);
     physx::PxRigidActor* CreatePlane(float xNormal, float yNormal, float zNormal, float distance);
     physx::PxRigidActor* CreateHeightField(const std::vector<int16_t> &heightmap, unsigned columns, unsigned rows, const Vector3 &scale);
+    physx::PxRigidActor* CreateHeightField(const physx::PxHeightFieldGeometry &hfGeom);
     physx::PxRigidActor* CreateBoxDynamic(const Vector3 &pos, const Vector3 &halfExtents, float density);
     physx::PxRigidActor* CreateBoxKinematic(const Vector3 &pos, const Vector3 &halfExtents, float density);
     physx::PxRigidActor* CreateBoxStatic(const Vector3 &pos, const Vector3 &halfExtents);
@@ -33,8 +34,9 @@ public:
     physx::PxRigidActor* CreateCapsuleKinematic(const Vector3 &pos, float radius, float halfHeight, float density);
     physx::PxRigidActor* CreateCapsuleStatic(const Vector3 &pos, float radius, float halfHeight);
     physx::PxRigidActor* CreateMeshKinematic(const Vector3 &pos, const Vector3 &scale, const std::vector<float> &vb, const std::vector<uint16_t> &ib, float density);
+    physx::PxRigidActor* CreateMeshKinematic(const Vector3 &pos, const physx::PxTriangleMeshGeometry &triGeom, float density);
     physx::PxRigidActor* CreateMeshStatic(const Vector3 &pos, const Vector3 &scale, const std::vector<float> &vb, const std::vector<uint16_t> &ib);
-
+    physx::PxRigidActor* CreateMeshStatic(const Vector3 &pos, const physx::PxTriangleMeshGeometry &triGeom);
     void SetLinearVelocity(physx::PxRigidActor* actor, const Vector3 &velocity);
     void AddForce(physx::PxRigidActor* actor, const Vector3 &force);
     void ClearForce(physx::PxRigidActor* actor);
@@ -55,9 +57,6 @@ private:
     physx::PxDefaultCpuDispatcher* mCpuDispatcher;
     std::vector<physx::PxRigidActor*> mPhysicsActors;
     float mTimestep;
-
-    std::vector<physx::PxRigidActor*> mTempVec;
-    unsigned long mPreUpdateTime;
 
     friend class PhysxScene;
 };

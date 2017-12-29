@@ -1,21 +1,7 @@
 #include "physx_wrap_impl.h"
-#include <extensions/PxDefaultAllocator.h>
-#include <extensions/PxDefaultErrorCallback.h>
-#include <foundation/PxFoundationVersion.h>
-#include <common/PxTolerancesScale.h>
-#include <PxPhysicsVersion.h>
-#include <PxSceneDesc.h>
-#include <extensions/PxDefaultSimulationFilterShader.h>
 #include <PxSceneLock.h>
-#include <extensions/PxSimpleFactory.h>
 #include <PxRigidStatic.h>
 #include <PxRigidDynamic.h>
-#include <PxRigidBody.h>
-#include <cooking/PxTriangleMeshDesc.h>
-#include <extensions/PxDefaultStreams.h>
-#include <extensions/PxRigidActorExt.h>
-#include <geometry/PxHeightFieldSample.h>
-#include <geometry/PxHeightFieldDesc.h>
 #include <extensions/PxExtensionsAPI.h>
 #include <cassert>
 #include "log.h"
@@ -61,7 +47,7 @@ PhysxSceneImpl::PhysxSceneImpl()
     , mCpuDispatcher(nullptr)
     , mTimestep(1.0f / 60.0f)
 {
-    mPreUpdateTime = GetTimeStamp();
+
 }
 
 PhysxSceneImpl::~PhysxSceneImpl() {
@@ -119,14 +105,11 @@ void PhysxSceneImpl::release() {
     SAFE_RELEASE(mCpuDispatcher);
 }
 
-void PhysxSceneImpl::Update() {
+void PhysxSceneImpl::Update(float dtime) {
     if (mScene != nullptr) {
-        const physx::PxReal timestep = mTimestep;
-        unsigned long nowTime = GetTimeStamp();
-        float dtime = float(nowTime - mPreUpdateTime) / 1000.0f;
-        mPreUpdateTime = nowTime;
-        while (dtime > 0.0f) {
-            const physx::PxReal dt = dtime >= timestep ? timestep : dtime;
+        while (dtime > 0.0f)
+        {
+            const float dt = (dtime >= mTimestep ? mTimestep : dtime);
             mScene->simulate(dt);
             mScene->fetchResults();
             dtime -= dt;
@@ -147,52 +130,32 @@ physx::PxRigidActor* PhysxSceneImpl::CreatePlane(float xNormal, float yNormal, f
 }
 
 physx::PxRigidActor* PhysxSceneImpl::CreateHeightField(const std::vector<int16_t> &heightmap, unsigned columns, unsigned rows, const Vector3 &scale) {
-    unsigned hfNumVerts = columns*rows;
-    physx::PxHeightFieldSample* samples = (physx::PxHeightFieldSample*)malloc(sizeof(physx::PxHeightFieldSample)*hfNumVerts);
-    memset(samples, 0, hfNumVerts * sizeof(physx::PxHeightFieldSample));
-
-    for (unsigned row = 0; row < rows; row++)
-        for (unsigned col = 0; col < columns; col++)
-        {
-            int index = col + row*columns;
-            samples[index].height = heightmap[index];
-            //samples[index].setTessFlag();
-            //samples[index].materialIndex0 = 1;
-            //samples[index].materialIndex1 = 1;
-        }
-
-    physx::PxHeightFieldDesc hfDesc;
-    hfDesc.format = physx::PxHeightFieldFormat::eS16_TM;
-    hfDesc.nbColumns = columns;
-    hfDesc.nbRows = rows;
-    hfDesc.samples.data = samples;
-    hfDesc.samples.stride = sizeof(physx::PxHeightFieldSample);
-
-    physx::PxHeightField* heightField = gPhysxSDKImpl->GetCooking()->createHeightField(hfDesc, gPhysxSDKImpl->GetPhysics()->getPhysicsInsertionCallback());
-    if (!heightField) {
-        ERROR("[physx] creating the heightfield failed");
-        free(samples);
+    physx::PxHeightFieldGeometry hfGeom;
+    if (GetHeightFieldGeometry(hfGeom, heightmap, columns, rows, scale) == false) {
+        ERROR("[physx] creating heightfield geometry failed");
         return nullptr;
     }
+    return CreateHeightField(hfGeom);
+}
 
+physx::PxRigidActor* PhysxSceneImpl::CreateHeightField(const physx::PxHeightFieldGeometry &hfGeom) {
+    SCENE_LOCK();
+    auto columns = hfGeom.heightField->getNbColumns();
+    auto rows = hfGeom.heightField->getNbRows();
     physx::PxTransform pose = physx::PxTransform(physx::PxIdentity);
-    pose.p = physx::PxVec3(-(float(columns) / 2 * scale.X), 0, -(float(rows) / 2 * scale.Z));
+    pose.p = physx::PxVec3(-(float(columns) / 2 * hfGeom.columnScale), 0, -(float(rows) / 2 * hfGeom.rowScale));
     physx::PxRigidStatic* hfActor = gPhysxSDKImpl->GetPhysics()->createRigidStatic(pose);
     if (!hfActor) {
         ERROR("[physx] creating heightfield actor failed");
-        free(samples);
         return nullptr;
     }
-    physx::PxHeightFieldGeometry hfGeom(heightField, physx::PxMeshGeometryFlags(), scale.Y, scale.Z, scale.X);
     physx::PxShape* hfShape = physx::PxRigidActorExt::createExclusiveShape(*hfActor, hfGeom, gPhysxSDKImpl->GetMaterial());
     if (!hfShape) {
         ERROR("[physx] creating heightfield shape failed");
-        free(samples);
         return nullptr;
     }
     mScene->addActor(*hfActor);
     mPhysicsActors.push_back(hfActor);
-    free(samples);
     return hfActor;
 }
 
@@ -320,87 +283,43 @@ physx::PxRigidActor* PhysxSceneImpl::CreateCapsuleStatic(const Vector3 &pos, flo
 }
 
 physx::PxRigidActor* PhysxSceneImpl::CreateMeshKinematic(const Vector3 &pos, const Vector3 &scale, const std::vector<float> &vb, const std::vector<uint16_t> &ib, float density) {
+    physx::PxTriangleMeshGeometry triGeom;
+    if (GetMeshGeometry(triGeom, pos, scale, vb, ib) == false) {
+        return nullptr;
+    }
+    return CreateMeshKinematic(pos, triGeom, density);
+}
+
+physx::PxRigidActor* PhysxSceneImpl::CreateMeshKinematic(const Vector3 &pos, const physx::PxTriangleMeshGeometry &triGeom, float density) {
     SCENE_LOCK();
-    physx::PxTriangleMeshDesc meshDesc;
-    meshDesc.points.count = physx::PxU32(vb.size() / 3);
-    meshDesc.triangles.count = physx::PxU32(ib.size() / 3);
-    meshDesc.points.stride = sizeof(float) * 3;
-    meshDesc.triangles.stride = sizeof(uint16_t) * 3;
-    meshDesc.points.data = vb.data();
-    meshDesc.triangles.data = ib.data();
-    meshDesc.flags |= physx::PxMeshFlag::e16_BIT_INDICES;
-    meshDesc.flags |= physx::PxMeshFlag::eFLIPNORMALS;
-
-    physx::PxDefaultMemoryOutputStream streamout;
-    bool ok = gPhysxSDKImpl->GetCooking()->cookTriangleMesh(meshDesc, streamout);
-    if (!ok) {
-        ERROR("[physx] cookTriangleMesh fail.");
+    physx::PxRigidDynamic* mesh = PxCreateKinematic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), triGeom, gPhysxSDKImpl->GetMaterial(), density);
+    if (!mesh) {
+        ERROR("[physx] create kinematic mesh failed!");
         return nullptr;
     }
-
-    physx::PxDefaultMemoryInputData streamin(streamout.getData(), streamout.getSize());
-    physx::PxTriangleMesh* triangleMesh = gPhysxSDKImpl->GetPhysics()->createTriangleMesh(streamin);
-    if (triangleMesh) {
-        physx::PxMeshScale meshScale = physx::PxMeshScale(physx::PxVec3{ scale.X ,scale.Y ,scale.Z }, physx::PxQuat(physx::PxIdentity));
-        physx::PxTriangleMeshGeometry triGeom;
-        triGeom.triangleMesh = triangleMesh;
-        triGeom.scale = meshScale;
-        physx::PxRigidDynamic* mesh = PxCreateKinematic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), triGeom, gPhysxSDKImpl->GetMaterial(), density);
-        if (!mesh) {
-            ERROR("[physx] create kinematic mesh failed!");
-            return nullptr;
-        }
-        mScene->addActor(*mesh);
-        mPhysicsActors.push_back(mesh);
-        return mesh;
-    }
-    else
-    {
-        ERROR("[physx] createTriangleMesh fail.");
-        return nullptr;
-    }
+    mScene->addActor(*mesh);
+    mPhysicsActors.push_back(mesh);
+    return mesh;
 }
 
 physx::PxRigidActor* PhysxSceneImpl::CreateMeshStatic(const Vector3 &pos, const Vector3 &scale, const std::vector<float> &vb, const std::vector<uint16_t> &ib) {
+    physx::PxTriangleMeshGeometry triGeom;
+    if (GetMeshGeometry(triGeom, pos, scale, vb, ib) == false) {
+        return nullptr;
+    }
+    return CreateMeshStatic(pos, triGeom);
+}
+
+physx::PxRigidActor* PhysxSceneImpl::CreateMeshStatic(const Vector3 &pos, const physx::PxTriangleMeshGeometry &triGeom) {
     SCENE_LOCK();
-    physx::PxTriangleMeshDesc meshDesc;
-    meshDesc.points.count = physx::PxU32(vb.size() / 3);
-    meshDesc.triangles.count = physx::PxU32(ib.size() / 3);
-    meshDesc.points.stride = sizeof(float) * 3;
-    meshDesc.triangles.stride = sizeof(uint16_t) * 3;
-    meshDesc.points.data = vb.data();
-    meshDesc.triangles.data = ib.data();
-    meshDesc.flags |= physx::PxMeshFlag::e16_BIT_INDICES;
-    meshDesc.flags |= physx::PxMeshFlag::eFLIPNORMALS;
-
-    physx::PxDefaultMemoryOutputStream streamout;
-    bool ok = gPhysxSDKImpl->GetCooking()->cookTriangleMesh(meshDesc, streamout);
-    if (!ok) {
-        ERROR("[physx] cookTriangleMesh fail.");
+    physx::PxRigidStatic* mesh = PxCreateStatic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), triGeom, gPhysxSDKImpl->GetMaterial());
+    if (!mesh) {
+        ERROR("[physx] create static mesh failed!");
         return nullptr;
     }
-
-    physx::PxDefaultMemoryInputData streamin(streamout.getData(), streamout.getSize());
-    physx::PxTriangleMesh* triangleMesh = gPhysxSDKImpl->GetPhysics()->createTriangleMesh(streamin);
-    if (triangleMesh) {
-        physx::PxMeshScale meshScale = physx::PxMeshScale(physx::PxVec3{ scale.X ,scale.Y ,scale.Z }, physx::PxQuat(physx::PxIdentity));
-        physx::PxTriangleMeshGeometry triGeom;
-        triGeom.triangleMesh = triangleMesh;
-        triGeom.scale = meshScale;
-        physx::PxRigidStatic* mesh = PxCreateStatic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), triGeom, gPhysxSDKImpl->GetMaterial());
-        if (!mesh) {
-            ERROR("[physx] create static mesh failed!");
-            return nullptr;
-        }
-        mScene->addActor(*mesh);
-        mPhysicsActors.push_back(mesh);
-        return mesh;
-    }
-    else
-    {
-        ERROR("[physx] createTriangleMesh fail.");
-        return nullptr;
-    }
+    mScene->addActor(*mesh);
+    mPhysicsActors.push_back(mesh);
+    return mesh;
 }
 
 void PhysxSceneImpl::SetLinearVelocity(physx::PxRigidActor* actor, const Vector3 &velocity) {
@@ -469,7 +388,7 @@ void PhysxSceneImpl::CreateScene(const std::string &path) {
         for (size_t i = 0; i < sceneInfo->Terrains.size(); i++)
         {
             auto &info = sceneInfo->Terrains[i];
-            auto actor = CreateHeightField(info.data, info.d, info.d, Vector3{ info.Size.X / (info.d - 1), info.Size.Z / (info.d - 1), 1 });
+            auto actor = CreateHeightField(info.Geom);
             SetGlobalPostion(actor, info.Postion);
             SetGlobalRotate(actor, info.Rotate);
         }
@@ -482,19 +401,19 @@ void PhysxSceneImpl::CreateScene(const std::string &path) {
         for (size_t i = 0; i < sceneInfo->Capsules.size(); i++)
         {
             auto &info = sceneInfo->Capsules[i];
-            auto actor = CreateCapsuleStatic(info.Postion, info.radius, info.halfHeight);
+            auto actor = CreateCapsuleStatic(info.Postion, info.Radius, info.HalfHeight);
             SetGlobalRotate(actor, info.Rotate);
         }
         for (size_t i = 0; i < sceneInfo->Meshs.size(); i++)
         {
             auto &info = sceneInfo->Meshs[i];
-            auto actor = CreateMeshStatic(info.Postion, info.Scale, info.vb, info.ib);
+            auto actor = CreateMeshStatic(info.Postion, info.Scale, info.VB, info.IB);
             SetGlobalRotate(actor, info.Rotate);
         }
         for (size_t i = 0; i < sceneInfo->Spheres.size(); i++)
         {
             auto &info = sceneInfo->Spheres[i];
-            auto actor = CreateSphereStatic(info.Postion, info.radius);
+            auto actor = CreateSphereStatic(info.Postion, info.Radius);
             SetGlobalRotate(actor, info.Rotate);
         }
     }
