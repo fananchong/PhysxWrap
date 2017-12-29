@@ -61,8 +61,8 @@ project "PhysxWrapGo"
     targetname "PhysxWrapGo"
     dependson { "PhysxWrap" }
     files {
-        "../src/physx_wrap_go/**.h",
-        "../src/physx_wrap_go/**.cpp",
+        "../src/go/**.h",
+        "../src/go/**.cpp",
     }
         
 project "test"
