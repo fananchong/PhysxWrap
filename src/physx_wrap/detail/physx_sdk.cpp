@@ -122,7 +122,10 @@ bool GetHeightFieldGeometry(physx::PxHeightFieldGeometry &geom, const std::vecto
         free(samples);
         return false;
     }
-    geom = physx::PxHeightFieldGeometry(heightField, physx::PxMeshGeometryFlags(), scale.Y, scale.Z, scale.X);
+    geom.heightField = heightField;
+    geom.columnScale = scale.X;
+    geom.heightScale = scale.Y;
+    geom.rowScale = scale.Z;
     free(samples);
     return true;
 }

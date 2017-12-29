@@ -23,8 +23,8 @@ PhysxScene::~PhysxScene() {
     }
 }
 
-bool PhysxScene::Init(float timestep) {
-    return mImpl->Init(timestep);
+bool PhysxScene::Init() {
+    return mImpl->Init();
 }
 
 void PhysxScene::CreateScene(const std::string &path) {

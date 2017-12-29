@@ -27,7 +27,7 @@
 #endif
 #endif
 
-#ifdef SCENE_SAFE_THREAD
+#if defined(SCENE_SAFE_THREAD) || defined(_DEBUG)
 #define SCENE_LOCK() physx::PxSceneWriteLock scopedLock(*mScene);
 #else
 #define SCENE_LOCK()
@@ -45,7 +45,6 @@
 PhysxSceneImpl::PhysxSceneImpl()
     : mScene(nullptr)
     , mCpuDispatcher(nullptr)
-    , mTimestep(1.0f / 60.0f)
 {
 
 }
@@ -57,7 +56,7 @@ PhysxSceneImpl::~PhysxSceneImpl() {
 #endif
 }
 
-bool PhysxSceneImpl::Init(float timestep) {
+bool PhysxSceneImpl::Init() {
     physx::PxSceneDesc sceneDesc(gPhysxSDKImpl->GetPhysics()->getTolerancesScale());
     sceneDesc.gravity = physx::PxVec3(0.0f, -9.81f, 0.0f);
     mCpuDispatcher = physx::PxDefaultCpuDispatcherCreate(0);
@@ -90,7 +89,6 @@ bool PhysxSceneImpl::Init(float timestep) {
         pvdClient->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
     }
 #endif
-    mTimestep = timestep;
     return true;
 }
 
@@ -107,12 +105,11 @@ void PhysxSceneImpl::release() {
 
 void PhysxSceneImpl::Update(float dtime) {
     if (mScene != nullptr) {
-        while (dtime > 0.0f)
+        SCENE_LOCK();
+        if (dtime > 0.0f)
         {
-            const float dt = (dtime >= mTimestep ? mTimestep : dtime);
-            mScene->simulate(dt);
+            mScene->simulate(dtime);
             mScene->fetchResults();
-            dtime -= dt;
         }
     }
 }
@@ -407,7 +404,7 @@ void PhysxSceneImpl::CreateScene(const std::string &path) {
         for (size_t i = 0; i < sceneInfo->Meshs.size(); i++)
         {
             auto &info = sceneInfo->Meshs[i];
-            auto actor = CreateMeshStatic(info.Postion, info.Scale, info.VB, info.IB);
+            auto actor = CreateMeshStatic(info.Postion, info.Geom);
             SetGlobalRotate(actor, info.Rotate);
         }
         for (size_t i = 0; i < sceneInfo->Spheres.size(); i++)

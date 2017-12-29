@@ -3,7 +3,7 @@
 #include <iostream>
 #include "util.h"
 
-void Test2(PhysxScene& scene, const std::string &path) {
+void Test(PhysxScene& scene, const std::string &path) {
     auto t1 = GetTimeStamp();
     scene.CreateScene(path);
     auto t2 = GetTimeStamp();

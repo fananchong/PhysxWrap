@@ -25,11 +25,13 @@ struct ObjInfoBase {
 
 class MeshInfo : public ObjInfoBase
 {
+    std::vector<float> vb;
+    std::vector<uint16_t> ib;
+    Vector3 scale;
 public:
-    std::vector<float> VB;
-    std::vector<uint16_t> IB;
-    Vector3 Scale;
     physx::PxTriangleMeshGeometry Geom;
+
+    friend class SceneInfo;
 };
 
 class BoxInfo : public ObjInfoBase

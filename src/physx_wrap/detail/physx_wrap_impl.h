@@ -18,7 +18,7 @@ public:
     PhysxSceneImpl();
     ~PhysxSceneImpl();
 
-    bool Init(float timestep);
+    bool Init();
     void CreateScene(const std::string &path);
     void Update(float elapsedTime);
     physx::PxRigidActor* CreatePlane(float xNormal, float yNormal, float zNormal, float distance);
@@ -56,7 +56,6 @@ private:
     physx::PxScene* mScene;
     physx::PxDefaultCpuDispatcher* mCpuDispatcher;
     std::vector<physx::PxRigidActor*> mPhysicsActors;
-    float mTimestep;
 
     friend class PhysxScene;
 };

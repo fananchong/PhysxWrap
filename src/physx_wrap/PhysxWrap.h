@@ -32,7 +32,7 @@ public:
     PhysxScene();
     ~PhysxScene();
 
-    bool Init(float timestep);
+    bool Init();
     void CreateScene(const std::string &path);
     void Update(float elapsedTime); // second
 

@@ -93,9 +93,9 @@ void SceneInfo::parseMesh1(char* &pcontent) {
         pcontent += sizeof(float);
         float z = *(float*)pcontent;
         pcontent += sizeof(float);
-        info.VB.push_back(x);
-        info.VB.push_back(y);
-        info.VB.push_back(z);
+        info.vb.push_back(x);
+        info.vb.push_back(y);
+        info.vb.push_back(z);
     }
     uint32_t ilen = *(uint32_t*)pcontent;
     pcontent += sizeof(uint32_t);
@@ -104,7 +104,7 @@ void SceneInfo::parseMesh1(char* &pcontent) {
     {
         uint16_t v = *(uint16_t*)pcontent;
         pcontent += sizeof(uint16_t);
-        info.IB.push_back(v);
+        info.ib.push_back(v);
     }
     Meshs.emplace_back(info);
 }
@@ -149,7 +149,10 @@ void SceneInfo::parseMesh2(char* &pcontent) {
         info.Postion = baseInfo.Postion;
         info.Rotate = baseInfo.Rotate;
         info.Layer = baseInfo.Layer;
-        info.Scale = Vector3{ xScale,yScale,zScale };
+        info.scale = Vector3{ xScale,yScale,zScale };
+        if (GetMeshGeometry(info.Geom, info.Postion, info.scale, info.vb, info.ib) == false) {
+            assert(false);
+        }
     }
 }
 
@@ -176,7 +179,7 @@ void SceneInfo::parseTerrain(char* &pcontent) {
             data[j*d + i] = int16_t(v*size.Y);
         }
 
-    if (GetHeightFieldGeometry(info.Geom, data, d, d, Vector3{ size.X / (d - 1), 1, size.Y / (d - 1) })) {
+    if (GetHeightFieldGeometry(info.Geom, data, d, d, Vector3{ size.X / (d - 1), 1, size.Z / (d - 1) })) {
         Terrains.emplace_back(info);
     }
     else
