@@ -1,4 +1,4 @@
-#include "pxscene.h"
+#include "PhysxWrapGo.h"
 #include "../physx_wrap/PhysxWrap.h"
 
 #ifdef _MSC_VER
