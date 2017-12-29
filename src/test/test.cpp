@@ -3,6 +3,8 @@
 #include <iostream>
 #include "util.h"
 
+using namespace PhysxWrap;
+
 void Test(PhysxScene& scene, const std::string &path) {
     auto t1 = GetTimeStamp();
     scene.CreateScene(path);

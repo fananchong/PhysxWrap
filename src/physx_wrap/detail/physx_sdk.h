@@ -15,38 +15,41 @@
 #include "physx_sdk.h"
 #include "../PhysxWrap.h"
 
-class PhysxSDKImpl
-{
-public:
-    PhysxSDKImpl();
-    ~PhysxSDKImpl();
+namespace PhysxWrap {
+    class PhysxSDKImpl
+    {
+    public:
+        PhysxSDKImpl();
+        ~PhysxSDKImpl();
 
-    bool Init();
+        bool Init();
 
-    inline physx::PxFoundation* GetFoundation() { return mFoundation; }
-    inline physx::PxPhysics* GetPhysics() { return mPhysicsSDK; }
-    inline physx::PxCooking* GetCooking() { return mCooking; }
-    inline physx::PxMaterial& GetMaterial() { return *mMaterial; }
-    inline PhysxPVD &GetPVD() { return mPVD; }
+        inline physx::PxFoundation* GetFoundation() { return mFoundation; }
+        inline physx::PxPhysics* GetPhysics() { return mPhysicsSDK; }
+        inline physx::PxCooking* GetCooking() { return mCooking; }
+        inline physx::PxMaterial& GetMaterial() { return *mMaterial; }
+        inline PhysxPVD &GetPVD() { return mPVD; }
 
-protected:
-    virtual void customizeTolerances(physx::PxTolerancesScale&) {}
+    protected:
+        virtual void customizeTolerances(physx::PxTolerancesScale&) {}
 
-private:
-    void release();
+    private:
+        void release();
 
-    std::atomic_bool mInit;
-    physx::PxFoundation* mFoundation;
-    physx::PxPhysics* mPhysicsSDK;
-    physx::PxCooking* mCooking;
-    physx::PxMaterial* mMaterial;
-    PhysxPVD mPVD;
+        std::atomic_bool mInit;
+        physx::PxFoundation* mFoundation;
+        physx::PxPhysics* mPhysicsSDK;
+        physx::PxCooking* mCooking;
+        physx::PxMaterial* mMaterial;
+        PhysxPVD mPVD;
+    };
+
+
+    bool GetHeightFieldGeometry(physx::PxHeightFieldGeometry &geom, const std::vector<int16_t> &heightmap, unsigned columns, unsigned rows, const Vector3 &scale);
+    bool GetMeshGeometry(physx::PxTriangleMeshGeometry& geom, const Vector3 &pos, const Vector3 &scale, const std::vector<float> &vb, const std::vector<uint16_t> &ib);
+
+    extern PhysxSDKImpl* gPhysxSDKImpl;
+
 };
-
-
-bool GetHeightFieldGeometry(physx::PxHeightFieldGeometry &geom, const std::vector<int16_t> &heightmap, unsigned columns, unsigned rows, const Vector3 &scale);
-bool GetMeshGeometry(physx::PxTriangleMeshGeometry& geom, const Vector3 &pos, const Vector3 &scale, const std::vector<float> &vb, const std::vector<uint16_t> &ib);
-
-extern PhysxSDKImpl* gPhysxSDKImpl;
 
 #endif

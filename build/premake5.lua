@@ -58,10 +58,11 @@ project "PhysxWrap"
     
 project "PhysxWrapGo"
     kind "SharedLib"
-    targetname "PhysxWrap"
+    targetname "PhysxWrapGo"
+    dependson { "PhysxWrap" }
     files {
         "../src/physx_wrap_go/**.h",
-        "../src/physx_wrap_go/**.c",
+        "../src/physx_wrap_go/**.cpp",
     }
         
 project "test"

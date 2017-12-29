@@ -6,29 +6,33 @@
 #include <PxPhysics.h>
 #include <string>
 
-class PhysxPVD
-{
-public:
-    PhysxPVD();
-    ~PhysxPVD();
+namespace PhysxWrap {
 
-    void Init(physx::PxFoundation* foundation, const std::string &ip = "127.0.0.1", unsigned port = 5425, unsigned timeout = 10, bool useFullPvdConnection = true);
-    void CreatePvdConnection();
-    void Close();
+    class PhysxPVD
+    {
+    public:
+        PhysxPVD();
+        ~PhysxPVD();
 
-    physx::PxPvd* GetPvdInstance() { return mPvd; }
+        void Init(physx::PxFoundation* foundation, const std::string &ip = "127.0.0.1", unsigned port = 5425, unsigned timeout = 10, bool useFullPvdConnection = true);
+        void CreatePvdConnection();
+        void Close();
 
-private:
-    physx::PxPvd* mPvd;
-    physx::PxPvdTransport* mTransport;
-    physx::PxPvdInstrumentationFlags mPvdFlags;
-    std::string mIp;
-    unsigned mPort;
-    unsigned mTimeout;
-    bool mUseFullPvdConnection;
+        physx::PxPvd* GetPvdInstance() { return mPvd; }
 
-    // 
-    physx::PxFoundation* mFoundation;
+    private:
+        physx::PxPvd* mPvd;
+        physx::PxPvdTransport* mTransport;
+        physx::PxPvdInstrumentationFlags mPvdFlags;
+        std::string mIp;
+        unsigned mPort;
+        unsigned mTimeout;
+        bool mUseFullPvdConnection;
+
+        // 
+        physx::PxFoundation* mFoundation;
+    };
+
 };
 
 #endif

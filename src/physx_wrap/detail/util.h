@@ -3,7 +3,9 @@
 
 #include <string>
 
-unsigned long GetTimeStamp(void);
-std::string GetFileContent(const std::string &filename);
+namespace PhysxWrap {
+    unsigned long GetTimeStamp(void);
+    std::string GetFileContent(const std::string &filename);
+};
 
 #endif

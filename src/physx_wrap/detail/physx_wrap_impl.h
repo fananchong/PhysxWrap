@@ -12,53 +12,56 @@
 #include "physx_pvd.h"
 #include "../PhysxWrap.h"
 
-class PhysxSceneImpl
-{
-public:
-    PhysxSceneImpl();
-    ~PhysxSceneImpl();
+namespace PhysxWrap {
 
-    bool Init();
-    void CreateScene(const std::string &path);
-    void Update(float elapsedTime);
-    physx::PxRigidActor* CreatePlane(float xNormal, float yNormal, float zNormal, float distance);
-    physx::PxRigidActor* CreateHeightField(const std::vector<int16_t> &heightmap, unsigned columns, unsigned rows, const Vector3 &scale);
-    physx::PxRigidActor* CreateHeightField(const physx::PxHeightFieldGeometry &hfGeom);
-    physx::PxRigidActor* CreateBoxDynamic(const Vector3 &pos, const Vector3 &halfExtents, float density);
-    physx::PxRigidActor* CreateBoxKinematic(const Vector3 &pos, const Vector3 &halfExtents, float density);
-    physx::PxRigidActor* CreateBoxStatic(const Vector3 &pos, const Vector3 &halfExtents);
-    physx::PxRigidActor* CreateSphereDynamic(const Vector3 &pos, float radius, float density);
-    physx::PxRigidActor* CreateSphereKinematic(const Vector3 &pos, float radius, float density);
-    physx::PxRigidActor* CreateSphereStatic(const Vector3 &pos, float radius);
-    physx::PxRigidActor* CreateCapsuleDynamic(const Vector3 &pos, float radius, float halfHeight, float density);
-    physx::PxRigidActor* CreateCapsuleKinematic(const Vector3 &pos, float radius, float halfHeight, float density);
-    physx::PxRigidActor* CreateCapsuleStatic(const Vector3 &pos, float radius, float halfHeight);
-    physx::PxRigidActor* CreateMeshKinematic(const Vector3 &pos, const Vector3 &scale, const std::vector<float> &vb, const std::vector<uint16_t> &ib, float density);
-    physx::PxRigidActor* CreateMeshKinematic(const Vector3 &pos, const physx::PxTriangleMeshGeometry &triGeom, float density);
-    physx::PxRigidActor* CreateMeshStatic(const Vector3 &pos, const Vector3 &scale, const std::vector<float> &vb, const std::vector<uint16_t> &ib);
-    physx::PxRigidActor* CreateMeshStatic(const Vector3 &pos, const physx::PxTriangleMeshGeometry &triGeom);
-    void SetLinearVelocity(physx::PxRigidActor* actor, const Vector3 &velocity);
-    void AddForce(physx::PxRigidActor* actor, const Vector3 &force);
-    void ClearForce(physx::PxRigidActor* actor);
+    class PhysxSceneImpl
+    {
+    public:
+        PhysxSceneImpl();
+        ~PhysxSceneImpl();
 
-    Vector3 GetGlobalPostion(physx::PxRigidActor* actor);
-    Quat GetGlobalRotate(physx::PxRigidActor* actor);
-    void SetGlobalPostion(physx::PxRigidActor* actor, const Vector3 &pos);
-    void SetGlobalRotate(physx::PxRigidActor* actor, const Quat &rotate);
+        bool Init();
+        bool CreateScene(const std::string &path);
+        void Update(float elapsedTime);
+        physx::PxRigidActor* CreatePlane(float xNormal, float yNormal, float zNormal, float distance);
+        physx::PxRigidActor* CreateHeightField(const std::vector<int16_t> &heightmap, unsigned columns, unsigned rows, const Vector3 &scale);
+        physx::PxRigidActor* CreateHeightField(const physx::PxHeightFieldGeometry &hfGeom);
+        physx::PxRigidActor* CreateBoxDynamic(const Vector3 &pos, const Vector3 &halfExtents, float density);
+        physx::PxRigidActor* CreateBoxKinematic(const Vector3 &pos, const Vector3 &halfExtents, float density);
+        physx::PxRigidActor* CreateBoxStatic(const Vector3 &pos, const Vector3 &halfExtents);
+        physx::PxRigidActor* CreateSphereDynamic(const Vector3 &pos, float radius, float density);
+        physx::PxRigidActor* CreateSphereKinematic(const Vector3 &pos, float radius, float density);
+        physx::PxRigidActor* CreateSphereStatic(const Vector3 &pos, float radius);
+        physx::PxRigidActor* CreateCapsuleDynamic(const Vector3 &pos, float radius, float halfHeight, float density);
+        physx::PxRigidActor* CreateCapsuleKinematic(const Vector3 &pos, float radius, float halfHeight, float density);
+        physx::PxRigidActor* CreateCapsuleStatic(const Vector3 &pos, float radius, float halfHeight);
+        physx::PxRigidActor* CreateMeshKinematic(const Vector3 &pos, const Vector3 &scale, const std::vector<float> &vb, const std::vector<uint16_t> &ib, float density);
+        physx::PxRigidActor* CreateMeshKinematic(const Vector3 &pos, const physx::PxTriangleMeshGeometry &triGeom, float density);
+        physx::PxRigidActor* CreateMeshStatic(const Vector3 &pos, const Vector3 &scale, const std::vector<float> &vb, const std::vector<uint16_t> &ib);
+        physx::PxRigidActor* CreateMeshStatic(const Vector3 &pos, const physx::PxTriangleMeshGeometry &triGeom);
+        void SetLinearVelocity(physx::PxRigidActor* actor, const Vector3 &velocity);
+        void AddForce(physx::PxRigidActor* actor, const Vector3 &force);
+        void ClearForce(physx::PxRigidActor* actor);
 
-protected:
-    virtual void customizeTolerances(physx::PxTolerancesScale&) {}
-    virtual void customizeSceneDesc(physx::PxSceneDesc& desc) {}
+        Vector3 GetGlobalPostion(physx::PxRigidActor* actor);
+        Quat GetGlobalRotate(physx::PxRigidActor* actor);
+        void SetGlobalPostion(physx::PxRigidActor* actor, const Vector3 &pos);
+        void SetGlobalRotate(physx::PxRigidActor* actor, const Quat &rotate);
 
-private:
-    void release();
+    protected:
+        virtual void customizeTolerances(physx::PxTolerancesScale&) {}
+        virtual void customizeSceneDesc(physx::PxSceneDesc& desc) {}
 
-    physx::PxScene* mScene;
-    physx::PxDefaultCpuDispatcher* mCpuDispatcher;
-    std::vector<physx::PxRigidActor*> mPhysicsActors;
+    private:
+        void release();
 
-    friend class PhysxScene;
+        physx::PxScene* mScene;
+        physx::PxDefaultCpuDispatcher* mCpuDispatcher;
+        std::vector<physx::PxRigidActor*> mPhysicsActors;
+
+        friend class PhysxScene;
+    };
+
 };
-
 
 #endif

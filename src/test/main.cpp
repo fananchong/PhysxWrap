@@ -9,6 +9,8 @@
 #pragma comment(lib, "PhysxWrap.lib")
 #endif
 
+using namespace PhysxWrap;
+
 void Test(PhysxScene& scene, const std::string &path);
 
 int main(int argn, char argv[]) {
