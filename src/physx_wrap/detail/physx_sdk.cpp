@@ -68,8 +68,8 @@ namespace PhysxWrap {
             }
 
             physx::PxCookingParams params(scale);
-            params.meshWeldTolerance = 0.001f;
-            params.meshPreprocessParams = physx::PxMeshPreprocessingFlags(physx::PxMeshPreprocessingFlag::eWELD_VERTICES);
+            //params.meshWeldTolerance = 0.001f;
+            //params.meshPreprocessParams = physx::PxMeshPreprocessingFlags(physx::PxMeshPreprocessingFlag::eWELD_VERTICES);
             mCooking = PxCreateCooking(PX_PHYSICS_VERSION, *mFoundation, params);
             if (!mCooking) {
                 ERROR("[physx] PxCreateCooking failed!");
