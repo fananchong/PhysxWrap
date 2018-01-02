@@ -13,9 +13,9 @@
 extern "C" {
 #endif
 
-    typedef struct { float X; float Y; float Z; } Vector3;
-    typedef struct { float X; float Y;  float Z;  float W; } Quat;
-    typedef struct { int _1; } *PxScene;
+    typedef struct _Vector3 { float X; float Y; float Z; } Vector3;
+    typedef struct _Quat { float X; float Y;  float Z;  float W; } Quat;
+    typedef struct _PxScene { int _1; } *PxScene;
 
     DLLIMPORT int InitPhysxSDK();
     DLLIMPORT PxScene CreateScene(const char *path);
