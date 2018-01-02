@@ -36,12 +36,23 @@ workspace "PhysxWrap"
     
     
     if os.is("windows") then
-        includedirs {
-            "../deps/include/python/win",
-        }
     end
     if os.is("linux") then
-    
+        links{
+            "PhysxWrap",
+            "PhysX3Extensions",
+            "PhysX3Vehicle",
+            "PsFastXml",
+            "PxTask",
+            "SceneQuery",
+            "SimulationController",
+            "LowLevel",
+            "LowLevelAABB",
+            "LowLevelCloth",
+            "LowLevelDynamics",
+            "LowLevelParticles",
+            --"nvToolsExt",
+        }
     end
     
     

@@ -13,7 +13,7 @@ using namespace PhysxWrap;
 
 void Test(PhysxScene& scene, const std::string &path);
 
-int main(int argn, char argv[]) {
+int main(int argn, char *argv[]) {
 
     InitPhysxSDK();
 
@@ -28,7 +28,11 @@ int main(int argn, char argv[]) {
     scene.Init();
     Test(scene, "../../res/pxscene");
 
+#ifdef _MSC_VER
     srand(unsigned int(time(0)));
+#else
+    srand(time(0));
+#endif
     auto &s = scene;
     auto actor = s.CreateSphereDynamic(Vector3{ 10, 25, 10 }, 25);
     s.SetLinearVelocity(actor, Vector3{ 0, 0, 1 });
