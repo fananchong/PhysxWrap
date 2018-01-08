@@ -15,7 +15,8 @@ extern "C" {
 
     DLLIMPORT PxScene CreateScene(const char *path) {
         auto s = new PhysxWrap::PhysxScene();
-        if (s && s->Init() && s->CreateScene(path)) {
+        if (s && s->Init()) {
+            s->CreateScene(path);
             return (PxScene)s;
         }
 
