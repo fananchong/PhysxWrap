@@ -76,7 +76,7 @@ namespace PhysxWrap {
             }
         }
         auto t2 = GetTimeStamp();
-        INFO("load scene done. cost time = %u ms", t2 - t1);
+        INFO("load scene done. cost time = %u ms", unsigned(t2 - t1));
         return true;
     }
 
