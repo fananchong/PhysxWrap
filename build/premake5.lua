@@ -38,7 +38,7 @@ workspace "PhysxWrap"
     if os.is("windows") then
     end
     if os.is("linux") then
-        buildoptions { "-fPIC" }
+        buildoptions { "-fPIC -static-libgcc -static-libstdc++" }
         linkoptions { "-Wl,--start-group -lPhysxWrap -lPhysX3_x64 -lPhysX3Cooking_x64 -lPhysX3CharacterKinematic_x64 -lSimulationController -lSceneQuery -lPxTask -lPxPvdSDK_x64 -lPxFoundation_x64 -lLowLevelParticles -lLowLevelDynamics -lLowLevelCloth -lLowLevelAABB -lLowLevel -lPhysX3Common_x64 -lPsFastXml -lPhysX3Extensions -Wl,--end-group" }
         links{
             "pthread",
