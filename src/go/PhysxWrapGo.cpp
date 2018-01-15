@@ -131,14 +131,14 @@ extern "C" {
         s->SetGlobalRotate(id, PhysxWrap::Quat{ rotate->X, rotate->Y, rotate->Z, rotate->W });
     }
 
-    DLLIMPORT bool IsStaticObj(PxScene scene, UINT64 id) {
+    DLLIMPORT int IsStaticObj(PxScene scene, UINT64 id) {
         auto s = (PhysxWrap::PhysxScene*)scene;
-        return s->IsStaticObj(id);
+        return s->IsStaticObj(id) ? 1 : 0;
     }
 
-    DLLIMPORT bool IsDynamicObj(PxScene scene, UINT64 id) {
+    DLLIMPORT int IsDynamicObj(PxScene scene, UINT64 id) {
         auto s = (PhysxWrap::PhysxScene*)scene;
-        return s->IsDynamicObj(id);
+        return s->IsDynamicObj(id) ? 1 : 0;
     }
 
 

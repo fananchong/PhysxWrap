@@ -44,8 +44,8 @@ extern "C" {
     DLLIMPORT void SetGlobalPostion(PxScene scene, UINT64 id, const Vector3* pos);
     DLLIMPORT void SetGlobalRotate(PxScene scene, UINT64 id, const Quat* rotate);
 
-    DLLIMPORT bool IsStaticObj(PxScene scene, UINT64 id);
-    DLLIMPORT bool IsDynamicObj(PxScene scene, UINT64 id);
+    DLLIMPORT int IsStaticObj(PxScene scene, UINT64 id);
+    DLLIMPORT int IsDynamicObj(PxScene scene, UINT64 id);
 
 #ifdef __cplusplus
 }
