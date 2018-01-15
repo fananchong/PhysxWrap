@@ -8,7 +8,7 @@
 #include <PxScene.h>
 #include <PxRigidActor.h>
 #include <atomic>
-#include <vector>
+#include <unordered_map>
 #include "physx_pvd.h"
 #include "../PhysxWrap.h"
 
@@ -39,6 +39,9 @@ namespace PhysxWrap {
         physx::PxRigidActor* CreateMeshKinematic(const Vector3 &pos, const physx::PxTriangleMeshGeometry &triGeom, float density);
         physx::PxRigidActor* CreateMeshStatic(const Vector3 &pos, const Vector3 &scale, const std::vector<float> &vb, const std::vector<uint16_t> &ib);
         physx::PxRigidActor* CreateMeshStatic(const Vector3 &pos, const physx::PxTriangleMeshGeometry &triGeom);
+        
+        void RemoveActor(physx::PxRigidActor* actor);
+        
         void SetLinearVelocity(physx::PxRigidActor* actor, const Vector3 &velocity);
         void AddForce(physx::PxRigidActor* actor, const Vector3 &force);
         void ClearForce(physx::PxRigidActor* actor);
@@ -57,7 +60,7 @@ namespace PhysxWrap {
 
         physx::PxScene* mScene;
         physx::PxDefaultCpuDispatcher* mCpuDispatcher;
-        std::vector<physx::PxRigidActor*> mPhysicsActors;
+        std::unordered_map<physx::PxRigidActor*, int> mPhysicsActors;
 
         friend class PhysxScene;
     };

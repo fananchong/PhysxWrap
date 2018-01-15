@@ -98,8 +98,11 @@ namespace PhysxWrap {
     void PhysxSceneImpl::release() {
         {
             SCENE_LOCK();
-            for (size_t i = 0; i < mPhysicsActors.size(); ++i)
-                mPhysicsActors[i]->release();
+            for (auto it = mPhysicsActors.begin(); it != mPhysicsActors.end(); ++it) {
+                if (it->first != 0) {
+                    it->first->release();
+                }
+            }
             mPhysicsActors.clear();
         }
         SAFE_RELEASE(mScene);
@@ -125,7 +128,7 @@ namespace PhysxWrap {
             return nullptr;
         }
         mScene->addActor(*plane);
-        mPhysicsActors.push_back(plane);
+        mPhysicsActors[plane] = 1;
         return plane;
     }
 
@@ -155,7 +158,7 @@ namespace PhysxWrap {
             return nullptr;
         }
         mScene->addActor(*hfActor);
-        mPhysicsActors.push_back(hfActor);
+        mPhysicsActors[hfActor] = 1;
         return hfActor;
     }
 
@@ -172,9 +175,9 @@ namespace PhysxWrap {
         DEFAULT_RIGID_DYNAMIC(box);
 #endif
         mScene->addActor(*box);
-        mPhysicsActors.push_back(box);
+        mPhysicsActors[box] = 1;
         return box;
-    }
+        }
 
     physx::PxRigidActor* PhysxSceneImpl::CreateBoxKinematic(const Vector3 &pos, const Vector3 &halfExtents, float density) {
         SCENE_LOCK();
@@ -184,7 +187,7 @@ namespace PhysxWrap {
             return nullptr;
         }
         mScene->addActor(*box);
-        mPhysicsActors.push_back(box);
+        mPhysicsActors[box] = 1;
         return box;
     }
 
@@ -196,7 +199,7 @@ namespace PhysxWrap {
             return nullptr;
         }
         mScene->addActor(*box);
-        mPhysicsActors.push_back(box);
+        mPhysicsActors[box] = 1;
         return box;
     }
 
@@ -213,9 +216,9 @@ namespace PhysxWrap {
         DEFAULT_RIGID_DYNAMIC(sphere);
 #endif
         mScene->addActor(*sphere);
-        mPhysicsActors.push_back(sphere);
+        mPhysicsActors[sphere] = 1;
         return sphere;
-    }
+        }
 
     physx::PxRigidActor* PhysxSceneImpl::CreateSphereKinematic(const Vector3 &pos, float radius, float density) {
         SCENE_LOCK();
@@ -225,7 +228,7 @@ namespace PhysxWrap {
             return nullptr;
         }
         mScene->addActor(*sphere);
-        mPhysicsActors.push_back(sphere);
+        mPhysicsActors[sphere] = 1;
         return sphere;
     }
 
@@ -237,7 +240,7 @@ namespace PhysxWrap {
             return nullptr;
         }
         mScene->addActor(*sphere);
-        mPhysicsActors.push_back(sphere);
+        mPhysicsActors[sphere] = 1;
         return sphere;
     }
 
@@ -254,9 +257,9 @@ namespace PhysxWrap {
         DEFAULT_RIGID_DYNAMIC(capsule);
 #endif
         mScene->addActor(*capsule);
-        mPhysicsActors.push_back(capsule);
+        mPhysicsActors[capsule] = 1;
         return capsule;
-    }
+        }
 
     physx::PxRigidActor* PhysxSceneImpl::CreateCapsuleKinematic(const Vector3 &pos, float radius, float halfHeight, float density) {
         SCENE_LOCK();
@@ -266,7 +269,7 @@ namespace PhysxWrap {
             return nullptr;
         }
         mScene->addActor(*capsule);
-        mPhysicsActors.push_back(capsule);
+        mPhysicsActors[capsule] = 1;
         return capsule;
     }
 
@@ -278,7 +281,7 @@ namespace PhysxWrap {
             return nullptr;
         }
         mScene->addActor(*capsule);
-        mPhysicsActors.push_back(capsule);
+        mPhysicsActors[capsule] = 1;
         return capsule;
     }
 
@@ -298,7 +301,7 @@ namespace PhysxWrap {
             return nullptr;
         }
         mScene->addActor(*mesh);
-        mPhysicsActors.push_back(mesh);
+        mPhysicsActors[mesh] = 1;
         return mesh;
     }
 
@@ -318,8 +321,18 @@ namespace PhysxWrap {
             return nullptr;
         }
         mScene->addActor(*mesh);
-        mPhysicsActors.push_back(mesh);
+        mPhysicsActors[mesh] = 1;
         return mesh;
+    }
+
+    void PhysxSceneImpl::RemoveActor(physx::PxRigidActor* actor) {
+        auto it = mPhysicsActors.find(actor);
+        if (it != mPhysicsActors.end()) {
+            if (it->first != 0) {
+                it->first->release();
+            }
+            mPhysicsActors.erase(it);
+        }
     }
 
     void PhysxSceneImpl::SetLinearVelocity(physx::PxRigidActor* actor, const Vector3 &velocity) {
@@ -372,6 +385,10 @@ namespace PhysxWrap {
 
 
     bool PhysxSceneImpl::CreateScene(const std::string &path) {
+        if (path == "")
+        {
+            return true;
+        }
         auto sceneInfo = gSceneInfoMgr->Get(path);
         if (sceneInfo == nullptr)
         {
@@ -419,4 +436,4 @@ namespace PhysxWrap {
         }
         return sceneInfo != nullptr;
     }
-}
+    }

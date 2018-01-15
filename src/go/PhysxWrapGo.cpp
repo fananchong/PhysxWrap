@@ -84,6 +84,11 @@ extern "C" {
         return s->CreateCapsuleStatic(PhysxWrap::Vector3{ pos->X, pos->Y, pos->Z }, radius, halfHeight);
     }
 
+    DLLIMPORT void RemoveActor(PxScene scene, UINT64 id) {
+        auto s = (PhysxWrap::PhysxScene*)scene;
+        s->RemoveActor(id);
+    }
+
     DLLIMPORT void SetLinearVelocity(PxScene scene, UINT64 id, const Vector3* velocity) {
         auto s = (PhysxWrap::PhysxScene*)scene;
         s->SetLinearVelocity(id, PhysxWrap::Vector3{ velocity->X, velocity->Y, velocity->Z });

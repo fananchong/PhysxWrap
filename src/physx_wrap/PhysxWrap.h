@@ -51,6 +51,8 @@ namespace PhysxWrap {
         uint64_t CreateMeshKinematic(const Vector3 &pos, const Vector3 &scale, const std::vector<float> &vb, const std::vector<uint16_t> &ib);
         uint64_t CreateMeshStatic(const Vector3 &pos, const Vector3 &scale, const std::vector<float> &vb, const std::vector<uint16_t> &ib);
 
+        void RemoveActor(uint64_t id);
+
         void SetLinearVelocity(uint64_t id, const Vector3 &velocity);
         void AddForce(uint64_t id, const Vector3 &force);
         void ClearForce(uint64_t id);

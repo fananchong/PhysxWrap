@@ -32,6 +32,8 @@ extern "C" {
     DLLIMPORT UINT64 CreateCapsuleDynamic(PxScene scene, const Vector3* pos, float radius, float halfHeight);
     DLLIMPORT UINT64 CreateCapsuleKinematic(PxScene scene, const Vector3* pos, float radius, float halfHeight);
     DLLIMPORT UINT64 CreateCapsuleStatic(PxScene scene, const Vector3* pos, float radius, float halfHeight);
+    
+    DLLIMPORT void RemoveActor(PxScene scene, UINT64 id);
 
     DLLIMPORT void SetLinearVelocity(PxScene scene, UINT64 id, const Vector3* velocity);
     DLLIMPORT void AddForce(PxScene scene, UINT64 id, const Vector3* force);

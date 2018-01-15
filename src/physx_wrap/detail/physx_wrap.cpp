@@ -93,6 +93,11 @@ namespace PhysxWrap {
         return (uint64_t)mImpl->CreateMeshStatic(pos, scale, vb, ib);
     }
 
+    void PhysxScene::RemoveActor(uint64_t id) {
+        physx::PxRigidActor* actor = (physx::PxRigidActor*)id;
+        mImpl->RemoveActor(actor);
+    }
+
     void PhysxScene::SetLinearVelocity(uint64_t id, const Vector3 &velocity) {
         physx::PxRigidActor* actor = (physx::PxRigidActor*)id;
         mImpl->SetLinearVelocity(actor, velocity);
