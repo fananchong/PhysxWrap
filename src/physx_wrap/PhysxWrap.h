@@ -62,6 +62,9 @@ namespace PhysxWrap {
         void SetGlobalPostion(uint64_t id, const Vector3 &pos);
         void SetGlobalRotate(uint64_t id, const Quat &rotate);
 
+        bool IsStaticObj(uint64_t id);
+        bool IsDynamicObj(uint64_t id);
+
     private:
         void release();
         PhysxSceneImpl* mImpl;

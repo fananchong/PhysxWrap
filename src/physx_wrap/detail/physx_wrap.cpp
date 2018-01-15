@@ -133,6 +133,16 @@ namespace PhysxWrap {
         mImpl->SetGlobalRotate(actor, rotate);
     }
 
+    bool PhysxScene::IsStaticObj(uint64_t id) {
+        physx::PxRigidActor* actor = (physx::PxRigidActor*)id;
+        return mImpl->IsStaticObj(actor);
+    }
+
+    bool PhysxScene::IsDynamicObj(uint64_t id) {
+        physx::PxRigidActor* actor = (physx::PxRigidActor*)id;
+        return mImpl->IsDynamicObj(actor);
+    }
+
     MY_DLL_EXPORT_FUNC unsigned GetStaticObjCountInScene(const std::string &path) {
         return gSceneInfoMgr->GetStaticObjCount(path);
     }

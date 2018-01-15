@@ -131,6 +131,16 @@ extern "C" {
         s->SetGlobalRotate(id, PhysxWrap::Quat{ rotate->X, rotate->Y, rotate->Z, rotate->W });
     }
 
+    DLLIMPORT bool IsStaticObj(PxScene scene, UINT64 id) {
+        auto s = (PhysxWrap::PhysxScene*)scene;
+        return s->IsStaticObj(id);
+    }
+
+    DLLIMPORT bool IsDynamicObj(PxScene scene, UINT64 id) {
+        auto s = (PhysxWrap::PhysxScene*)scene;
+        return s->IsDynamicObj(id);
+    }
+
 
 #ifdef __cplusplus
 }

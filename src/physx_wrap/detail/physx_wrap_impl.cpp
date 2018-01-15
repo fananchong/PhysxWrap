@@ -177,7 +177,7 @@ namespace PhysxWrap {
         mScene->addActor(*box);
         mPhysicsActors[box] = 1;
         return box;
-        }
+    }
 
     physx::PxRigidActor* PhysxSceneImpl::CreateBoxKinematic(const Vector3 &pos, const Vector3 &halfExtents, float density) {
         SCENE_LOCK();
@@ -218,7 +218,7 @@ namespace PhysxWrap {
         mScene->addActor(*sphere);
         mPhysicsActors[sphere] = 1;
         return sphere;
-        }
+    }
 
     physx::PxRigidActor* PhysxSceneImpl::CreateSphereKinematic(const Vector3 &pos, float radius, float density) {
         SCENE_LOCK();
@@ -259,7 +259,7 @@ namespace PhysxWrap {
         mScene->addActor(*capsule);
         mPhysicsActors[capsule] = 1;
         return capsule;
-        }
+    }
 
     physx::PxRigidActor* PhysxSceneImpl::CreateCapsuleKinematic(const Vector3 &pos, float radius, float halfHeight, float density) {
         SCENE_LOCK();
@@ -336,6 +336,10 @@ namespace PhysxWrap {
     }
 
     void PhysxSceneImpl::SetLinearVelocity(physx::PxRigidActor* actor, const Vector3 &velocity) {
+        if (actor == 0)
+        {
+            return;
+        }
         if (actor->getType() == physx::PxActorType::eRIGID_DYNAMIC) {
             auto dynamicActor = (physx::PxRigidDynamic*)actor;
             dynamicActor->setLinearVelocity(physx::PxVec3{ velocity.X, velocity.Y, velocity.Z });
@@ -343,6 +347,10 @@ namespace PhysxWrap {
     }
 
     void PhysxSceneImpl::AddForce(physx::PxRigidActor* actor, const Vector3 &force) {
+        if (actor == 0)
+        {
+            return;
+        }
         if (actor->getType() == physx::PxActorType::eRIGID_DYNAMIC) {
             auto dynamicActor = (physx::PxRigidDynamic*)actor;
             dynamicActor->addForce(physx::PxVec3{ force.X, force.Y, force.Z });
@@ -350,6 +358,10 @@ namespace PhysxWrap {
     }
 
     void PhysxSceneImpl::ClearForce(physx::PxRigidActor* actor) {
+        if (actor == 0)
+        {
+            return;
+        }
         if (actor->getType() == physx::PxActorType::eRIGID_DYNAMIC) {
             auto dynamicActor = (physx::PxRigidDynamic*)actor;
             dynamicActor->clearForce();
@@ -357,16 +369,28 @@ namespace PhysxWrap {
     }
 
     Vector3 PhysxSceneImpl::GetGlobalPostion(physx::PxRigidActor* actor) {
+        if (actor == 0)
+        {
+            return Vector3{};
+        }
         auto pose = actor->getGlobalPose();
         return Vector3{ pose.p.x, pose.p.y, pose.p.z };
     }
 
     Quat PhysxSceneImpl::GetGlobalRotate(physx::PxRigidActor* actor) {
+        if (actor == 0)
+        {
+            return Quat{};
+        }
         auto pose = actor->getGlobalPose();
         return Quat{ pose.q.x, pose.q.y, pose.q.z, pose.q.w };
     }
 
     void PhysxSceneImpl::SetGlobalPostion(physx::PxRigidActor* actor, const Vector3 &pos) {
+        if (actor == 0)
+        {
+            return;
+        }
         auto pose = actor->getGlobalPose();
         pose.p.x = pos.X;
         pose.p.y = pos.Y;
@@ -375,6 +399,10 @@ namespace PhysxWrap {
     }
 
     void PhysxSceneImpl::SetGlobalRotate(physx::PxRigidActor* actor, const Quat &rotate) {
+        if (actor == 0)
+        {
+            return;
+        }
         auto pose = actor->getGlobalPose();
         pose.q.x = rotate.X;
         pose.q.y = rotate.Y;
@@ -383,6 +411,21 @@ namespace PhysxWrap {
         actor->setGlobalPose(pose);
     }
 
+    bool PhysxSceneImpl::IsStaticObj(physx::PxRigidActor* actor) {
+        if (actor == 0)
+        {
+            return false;
+        }
+        return actor->getType() == physx::PxActorType::eRIGID_STATIC;
+    }
+
+    bool PhysxSceneImpl::IsDynamicObj(physx::PxRigidActor* actor) {
+        if (actor == 0)
+        {
+            return false;
+        }
+        return actor->getType() == physx::PxActorType::eRIGID_DYNAMIC;
+    }
 
     bool PhysxSceneImpl::CreateScene(const std::string &path) {
         if (path == "")
@@ -436,4 +479,4 @@ namespace PhysxWrap {
         }
         return sceneInfo != nullptr;
     }
-    }
+}

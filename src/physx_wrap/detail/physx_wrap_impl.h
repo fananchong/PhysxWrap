@@ -51,6 +51,9 @@ namespace PhysxWrap {
         void SetGlobalPostion(physx::PxRigidActor* actor, const Vector3 &pos);
         void SetGlobalRotate(physx::PxRigidActor* actor, const Quat &rotate);
 
+        bool IsStaticObj(physx::PxRigidActor* actor);
+        bool IsDynamicObj(physx::PxRigidActor* actor);
+
     protected:
         virtual void customizeTolerances(physx::PxTolerancesScale&) {}
         virtual void customizeSceneDesc(physx::PxSceneDesc& desc) {}

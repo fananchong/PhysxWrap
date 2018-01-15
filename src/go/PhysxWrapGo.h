@@ -32,7 +32,7 @@ extern "C" {
     DLLIMPORT UINT64 CreateCapsuleDynamic(PxScene scene, const Vector3* pos, float radius, float halfHeight);
     DLLIMPORT UINT64 CreateCapsuleKinematic(PxScene scene, const Vector3* pos, float radius, float halfHeight);
     DLLIMPORT UINT64 CreateCapsuleStatic(PxScene scene, const Vector3* pos, float radius, float halfHeight);
-    
+
     DLLIMPORT void RemoveActor(PxScene scene, UINT64 id);
 
     DLLIMPORT void SetLinearVelocity(PxScene scene, UINT64 id, const Vector3* velocity);
@@ -43,6 +43,9 @@ extern "C" {
     DLLIMPORT void GetGlobalRotate(PxScene scene, UINT64 id, Quat* outRotate);
     DLLIMPORT void SetGlobalPostion(PxScene scene, UINT64 id, const Vector3* pos);
     DLLIMPORT void SetGlobalRotate(PxScene scene, UINT64 id, const Quat* rotate);
+
+    DLLIMPORT bool IsStaticObj(PxScene scene, UINT64 id);
+    DLLIMPORT bool IsDynamicObj(PxScene scene, UINT64 id);
 
 #ifdef __cplusplus
 }
