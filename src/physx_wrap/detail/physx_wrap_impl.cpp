@@ -3,6 +3,7 @@
 #include <PxRigidStatic.h>
 #include <PxRigidDynamic.h>
 #include <extensions/PxExtensionsAPI.h>
+#include <PxMaterial.h>
 #include <cassert>
 #include "log.h"
 #include "util.h"
@@ -35,7 +36,7 @@
 
 #define	SAFE_RELEASE(x)	if(x){ x->release(); x = NULL;	}
 #define DEFAULT_RIGID_DYNAMIC(ACTOR)                                                \
-    ACTOR->setAngularDamping(0.5f);                                                 \
+    ACTOR->setAngularDamping(mAngularDamping);                                      \
     ACTOR->setRigidBodyFlag(physx::PxRigidBodyFlag::eKINEMATIC, false);             \
 
 #define DEFAULT_RIGID_DYNAMIC_DEBUG(ACTOR)                                          \
@@ -48,6 +49,8 @@ namespace PhysxWrap {
     PhysxSceneImpl::PhysxSceneImpl()
         : mScene(nullptr)
         , mCpuDispatcher(nullptr)
+        , mMaterial(nullptr)
+        , mAngularDamping(0.5f)
     {
 
     }
@@ -60,6 +63,13 @@ namespace PhysxWrap {
     }
 
     bool PhysxSceneImpl::Init() {
+        mMaterial = gPhysxSDKImpl->GetPhysics()->createMaterial(0.5f, 0.5f, 1.0f);
+        if (!mMaterial) {
+            ERROR("[physx] createMaterial failed!");
+            release();
+            return false;
+        }
+
         physx::PxSceneDesc sceneDesc(gPhysxSDKImpl->GetPhysics()->getTolerancesScale());
         sceneDesc.gravity = physx::PxVec3(0.0f, -9.81f, 0.0f);
         mCpuDispatcher = physx::PxDefaultCpuDispatcherCreate(0);
@@ -96,6 +106,7 @@ namespace PhysxWrap {
     }
 
     void PhysxSceneImpl::release() {
+        SAFE_RELEASE(mMaterial);
         {
             SCENE_LOCK();
             for (auto it = mPhysicsActors.begin(); it != mPhysicsActors.end(); ++it) {
@@ -122,7 +133,7 @@ namespace PhysxWrap {
 
     physx::PxRigidActor* PhysxSceneImpl::CreatePlane(float xNormal, float yNormal, float zNormal, float distance) {
         SCENE_LOCK();
-        physx::PxRigidStatic* plane = physx::PxCreatePlane(*gPhysxSDKImpl->GetPhysics(), physx::PxPlane(physx::PxVec3(zNormal, yNormal, zNormal), distance), gPhysxSDKImpl->GetMaterial());
+        physx::PxRigidStatic* plane = physx::PxCreatePlane(*gPhysxSDKImpl->GetPhysics(), physx::PxPlane(physx::PxVec3(zNormal, yNormal, zNormal), distance), *mMaterial);
         if (!plane) {
             ERROR("[physx] create plane failed!");
             return nullptr;
@@ -152,7 +163,7 @@ namespace PhysxWrap {
             ERROR("[physx] creating heightfield actor failed");
             return nullptr;
         }
-        physx::PxShape* hfShape = physx::PxRigidActorExt::createExclusiveShape(*hfActor, hfGeom, gPhysxSDKImpl->GetMaterial());
+        physx::PxShape* hfShape = physx::PxRigidActorExt::createExclusiveShape(*hfActor, hfGeom, *mMaterial);
         if (!hfShape) {
             ERROR("[physx] creating heightfield shape failed");
             return nullptr;
@@ -164,7 +175,7 @@ namespace PhysxWrap {
 
     physx::PxRigidActor* PhysxSceneImpl::CreateBoxDynamic(const Vector3 &pos, const Vector3 &halfExtents, float density) {
         SCENE_LOCK();
-        physx::PxRigidDynamic* box = PxCreateDynamic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), physx::PxBoxGeometry(halfExtents.X, halfExtents.Y, halfExtents.Z), gPhysxSDKImpl->GetMaterial(), density);
+        physx::PxRigidDynamic* box = PxCreateDynamic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), physx::PxBoxGeometry(halfExtents.X, halfExtents.Y, halfExtents.Z), *mMaterial, density);
         if (!box) {
             ERROR("[physx] create dynamic box failed!");
             return nullptr;
@@ -181,7 +192,7 @@ namespace PhysxWrap {
 
     physx::PxRigidActor* PhysxSceneImpl::CreateBoxKinematic(const Vector3 &pos, const Vector3 &halfExtents, float density) {
         SCENE_LOCK();
-        physx::PxRigidDynamic* box = PxCreateKinematic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), physx::PxBoxGeometry(halfExtents.X, halfExtents.Y, halfExtents.Z), gPhysxSDKImpl->GetMaterial(), density);
+        physx::PxRigidDynamic* box = PxCreateKinematic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), physx::PxBoxGeometry(halfExtents.X, halfExtents.Y, halfExtents.Z), *mMaterial, density);
         if (!box) {
             ERROR("[physx] create kinematic box failed!");
             return nullptr;
@@ -193,7 +204,7 @@ namespace PhysxWrap {
 
     physx::PxRigidActor* PhysxSceneImpl::CreateBoxStatic(const Vector3 &pos, const Vector3 &halfExtents) {
         SCENE_LOCK();
-        physx::PxRigidStatic* box = PxCreateStatic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), physx::PxBoxGeometry(halfExtents.X, halfExtents.Y, halfExtents.Z), gPhysxSDKImpl->GetMaterial());
+        physx::PxRigidStatic* box = PxCreateStatic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), physx::PxBoxGeometry(halfExtents.X, halfExtents.Y, halfExtents.Z), *mMaterial);
         if (!box) {
             ERROR("[physx] create static box failed!");
             return nullptr;
@@ -205,7 +216,7 @@ namespace PhysxWrap {
 
     physx::PxRigidActor* PhysxSceneImpl::CreateSphereDynamic(const Vector3 &pos, float radius, float density) {
         SCENE_LOCK();
-        physx::PxRigidDynamic* sphere = PxCreateDynamic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), physx::PxSphereGeometry(radius), gPhysxSDKImpl->GetMaterial(), density);
+        physx::PxRigidDynamic* sphere = PxCreateDynamic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), physx::PxSphereGeometry(radius), *mMaterial, density);
         if (!sphere) {
             ERROR("[physx] create dynamic sphere failed!");
             return nullptr;
@@ -222,7 +233,7 @@ namespace PhysxWrap {
 
     physx::PxRigidActor* PhysxSceneImpl::CreateSphereKinematic(const Vector3 &pos, float radius, float density) {
         SCENE_LOCK();
-        physx::PxRigidDynamic* sphere = PxCreateKinematic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), physx::PxSphereGeometry(radius), gPhysxSDKImpl->GetMaterial(), density);
+        physx::PxRigidDynamic* sphere = PxCreateKinematic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), physx::PxSphereGeometry(radius), *mMaterial, density);
         if (!sphere) {
             ERROR("[physx] create kinematic sphere failed!");
             return nullptr;
@@ -234,7 +245,7 @@ namespace PhysxWrap {
 
     physx::PxRigidActor*  PhysxSceneImpl::CreateSphereStatic(const Vector3 &pos, float radius) {
         SCENE_LOCK();
-        physx::PxRigidStatic* sphere = PxCreateStatic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), physx::PxSphereGeometry(radius), gPhysxSDKImpl->GetMaterial());
+        physx::PxRigidStatic* sphere = PxCreateStatic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), physx::PxSphereGeometry(radius), *mMaterial);
         if (!sphere) {
             ERROR("[physx] create static sphere failed!");
             return nullptr;
@@ -246,7 +257,7 @@ namespace PhysxWrap {
 
     physx::PxRigidActor* PhysxSceneImpl::CreateCapsuleDynamic(const Vector3 &pos, float radius, float halfHeight, float density) {
         SCENE_LOCK();
-        physx::PxRigidDynamic* capsule = PxCreateDynamic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), physx::PxCapsuleGeometry(radius, halfHeight), gPhysxSDKImpl->GetMaterial(), density);
+        physx::PxRigidDynamic* capsule = PxCreateDynamic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), physx::PxCapsuleGeometry(radius, halfHeight), *mMaterial, density);
         if (!capsule) {
             ERROR("[physx] create dynamic capsule failed!");
             return nullptr;
@@ -263,7 +274,7 @@ namespace PhysxWrap {
 
     physx::PxRigidActor* PhysxSceneImpl::CreateCapsuleKinematic(const Vector3 &pos, float radius, float halfHeight, float density) {
         SCENE_LOCK();
-        physx::PxRigidDynamic* capsule = PxCreateKinematic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), physx::PxCapsuleGeometry(radius, halfHeight), gPhysxSDKImpl->GetMaterial(), density);
+        physx::PxRigidDynamic* capsule = PxCreateKinematic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), physx::PxCapsuleGeometry(radius, halfHeight), *mMaterial, density);
         if (!capsule) {
             ERROR("[physx] create kinematic capsule failed!");
             return nullptr;
@@ -275,7 +286,7 @@ namespace PhysxWrap {
 
     physx::PxRigidActor* PhysxSceneImpl::CreateCapsuleStatic(const Vector3 &pos, float radius, float halfHeight) {
         SCENE_LOCK();
-        physx::PxRigidStatic* capsule = PxCreateStatic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), physx::PxCapsuleGeometry(radius, halfHeight), gPhysxSDKImpl->GetMaterial());
+        physx::PxRigidStatic* capsule = PxCreateStatic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), physx::PxCapsuleGeometry(radius, halfHeight), *mMaterial);
         if (!capsule) {
             ERROR("[physx] create static capsule failed!");
             return nullptr;
@@ -295,7 +306,7 @@ namespace PhysxWrap {
 
     physx::PxRigidActor* PhysxSceneImpl::CreateMeshKinematic(const Vector3 &pos, const physx::PxTriangleMeshGeometry &triGeom, float density) {
         SCENE_LOCK();
-        physx::PxRigidDynamic* mesh = PxCreateKinematic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), triGeom, gPhysxSDKImpl->GetMaterial(), density);
+        physx::PxRigidDynamic* mesh = PxCreateKinematic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), triGeom, *mMaterial, density);
         if (!mesh) {
             ERROR("[physx] create kinematic mesh failed!");
             return nullptr;
@@ -315,7 +326,7 @@ namespace PhysxWrap {
 
     physx::PxRigidActor* PhysxSceneImpl::CreateMeshStatic(const Vector3 &pos, const physx::PxTriangleMeshGeometry &triGeom) {
         SCENE_LOCK();
-        physx::PxRigidStatic* mesh = PxCreateStatic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), triGeom, gPhysxSDKImpl->GetMaterial());
+        physx::PxRigidStatic* mesh = PxCreateStatic(*gPhysxSDKImpl->GetPhysics(), physx::PxTransform(pos.X, pos.Y, pos.Z), triGeom, *mMaterial);
         if (!mesh) {
             ERROR("[physx] create static mesh failed!");
             return nullptr;
@@ -425,6 +436,18 @@ namespace PhysxWrap {
             return false;
         }
         return actor->getType() == physx::PxActorType::eRIGID_DYNAMIC;
+    }
+
+    void PhysxSceneImpl::SetCurrentMaterial(float staticFriction, float dynamicFriction, float restitution) {
+        if (mMaterial != nullptr) {
+            mMaterial->setStaticFriction(staticFriction);
+            mMaterial->setDynamicFriction(dynamicFriction);
+            mMaterial->setRestitution(restitution);
+        }
+    }
+
+    void PhysxSceneImpl::SetCurrentAngularDamping(float value) {
+        mAngularDamping = value;
     }
 
     bool PhysxSceneImpl::CreateScene(const std::string &path) {

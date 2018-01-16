@@ -47,6 +47,9 @@ extern "C" {
     DLLIMPORT int IsStaticObj(PxScene scene, UINT64 id);
     DLLIMPORT int IsDynamicObj(PxScene scene, UINT64 id);
 
+    DLLIMPORT void SetCurrentMaterial(PxScene scene, float staticFriction, float dynamicFriction, float restitution);
+    DLLIMPORT void SetCurrentAngularDamping(PxScene scene, float value);
+
 #ifdef __cplusplus
 }
 #endif

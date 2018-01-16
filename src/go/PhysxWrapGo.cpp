@@ -141,6 +141,15 @@ extern "C" {
         return s->IsDynamicObj(id) ? 1 : 0;
     }
 
+    DLLIMPORT void SetCurrentMaterial(PxScene scene, float staticFriction, float dynamicFriction, float restitution) {
+        auto s = (PhysxWrap::PhysxScene*)scene;
+        s->SetCurrentMaterial(staticFriction, dynamicFriction, restitution);
+    }
+
+    DLLIMPORT void SetCurrentAngularDamping(PxScene scene, float value) {
+        auto s = (PhysxWrap::PhysxScene*)scene;
+        s->SetCurrentAngularDamping(value);
+    }
 
 #ifdef __cplusplus
 }

@@ -65,6 +65,9 @@ namespace PhysxWrap {
         bool IsStaticObj(uint64_t id);
         bool IsDynamicObj(uint64_t id);
 
+        void SetCurrentMaterial(float staticFriction, float dynamicFriction, float restitution);
+        void SetCurrentAngularDamping(float value);
+
     private:
         void release();
         PhysxSceneImpl* mImpl;

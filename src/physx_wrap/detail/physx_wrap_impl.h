@@ -54,6 +54,9 @@ namespace PhysxWrap {
         bool IsStaticObj(physx::PxRigidActor* actor);
         bool IsDynamicObj(physx::PxRigidActor* actor);
 
+        void SetCurrentMaterial(float staticFriction, float dynamicFriction, float restitution);
+        void SetCurrentAngularDamping(float value);
+
     protected:
         virtual void customizeTolerances(physx::PxTolerancesScale&) {}
         virtual void customizeSceneDesc(physx::PxSceneDesc& desc) {}
@@ -63,6 +66,8 @@ namespace PhysxWrap {
 
         physx::PxScene* mScene;
         physx::PxDefaultCpuDispatcher* mCpuDispatcher;
+        physx::PxMaterial* mMaterial;
+        float mAngularDamping;
         std::unordered_map<physx::PxRigidActor*, int> mPhysicsActors;
 
         friend class PhysxScene;

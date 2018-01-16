@@ -143,6 +143,14 @@ namespace PhysxWrap {
         return mImpl->IsDynamicObj(actor);
     }
 
+    void PhysxScene::SetCurrentMaterial(float staticFriction, float dynamicFriction, float restitution) {
+        mImpl->SetCurrentMaterial(staticFriction, dynamicFriction, restitution);
+    }
+
+    void PhysxScene::SetCurrentAngularDamping(float value) {
+        mImpl->SetCurrentAngularDamping(value);
+    }
+
     MY_DLL_EXPORT_FUNC unsigned GetStaticObjCountInScene(const std::string &path) {
         return gSceneInfoMgr->GetStaticObjCount(path);
     }

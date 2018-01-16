@@ -4,7 +4,6 @@
 #include <foundation/PxFoundationVersion.h>
 #include <PxPhysicsVersion.h>
 #include <extensions/PxExtensionsAPI.h>
-#include <PxMaterial.h>
 #include "log.h"
 
 namespace PhysxWrap {
@@ -21,7 +20,6 @@ namespace PhysxWrap {
         , mFoundation(nullptr)
         , mPhysicsSDK(nullptr)
         , mCooking(nullptr)
-        , mMaterial(nullptr)
     {
 
     }
@@ -60,12 +58,6 @@ namespace PhysxWrap {
                 return false;
             }
 #endif
-            mMaterial = mPhysicsSDK->createMaterial(0.5f, 0.5f, 1.0f);
-            if (!mMaterial) {
-                ERROR("[physx] createMaterial failed!");
-                release();
-                return false;
-            }
 
             physx::PxCookingParams params(scale);
             //params.meshWeldTolerance = 0.001f;
@@ -84,7 +76,6 @@ namespace PhysxWrap {
     void PhysxSDKImpl::release() {
         bool exp = true;
         if (mInit.compare_exchange_strong(exp, false)) {
-            SAFE_RELEASE(mMaterial);
             SAFE_RELEASE(mCooking);
 #ifdef _DEBUG
             PxCloseExtensions();

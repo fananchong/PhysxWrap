@@ -27,7 +27,6 @@ namespace PhysxWrap {
         inline physx::PxFoundation* GetFoundation() { return mFoundation; }
         inline physx::PxPhysics* GetPhysics() { return mPhysicsSDK; }
         inline physx::PxCooking* GetCooking() { return mCooking; }
-        inline physx::PxMaterial& GetMaterial() { return *mMaterial; }
         inline PhysxPVD &GetPVD() { return mPVD; }
 
     protected:
@@ -40,7 +39,6 @@ namespace PhysxWrap {
         physx::PxFoundation* mFoundation;
         physx::PxPhysics* mPhysicsSDK;
         physx::PxCooking* mCooking;
-        physx::PxMaterial* mMaterial;
         PhysxPVD mPVD;
     };
 
