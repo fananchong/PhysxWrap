@@ -60,7 +60,7 @@ namespace PhysxWrap {
                 return false;
             }
 #endif
-            mMaterial = mPhysicsSDK->createMaterial(0.5f, 0.5f, 0.1f);
+            mMaterial = mPhysicsSDK->createMaterial(0.5f, 0.5f, 1.0f);
             if (!mMaterial) {
                 ERROR("[physx] createMaterial failed!");
                 release();
