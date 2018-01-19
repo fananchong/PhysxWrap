@@ -30,9 +30,11 @@ void Test3() {
             scene.CreateBoxStatic(Vector3{ x + 10, y + 10, z + 10 }, Vector3{ 1,1,1 });
         }
 
-        if (count % 100 == 0)
+        for (size_t i = 0; i < 5000; i++)
         {
-            std::cout << ".";
+            scene.Update(0.016f);
         }
+
+        std::cout << ".";
     }
 }

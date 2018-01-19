@@ -39,9 +39,9 @@ namespace PhysxWrap {
         physx::PxRigidActor* CreateMeshKinematic(const Vector3 &pos, const physx::PxTriangleMeshGeometry &triGeom, float density);
         physx::PxRigidActor* CreateMeshStatic(const Vector3 &pos, const Vector3 &scale, const std::vector<float> &vb, const std::vector<uint16_t> &ib);
         physx::PxRigidActor* CreateMeshStatic(const Vector3 &pos, const physx::PxTriangleMeshGeometry &triGeom);
-        
+
         void RemoveActor(physx::PxRigidActor* actor);
-        
+
         void SetLinearVelocity(physx::PxRigidActor* actor, const Vector3 &velocity);
         void AddForce(physx::PxRigidActor* actor, const Vector3 &force);
         void ClearForce(physx::PxRigidActor* actor);
@@ -67,6 +67,7 @@ namespace PhysxWrap {
         physx::PxScene* mScene;
         physx::PxDefaultCpuDispatcher* mCpuDispatcher;
         physx::PxMaterial* mMaterial;
+        void* mScratchBlock;
         float mAngularDamping;
         std::unordered_map<physx::PxRigidActor*, int> mPhysicsActors;
 

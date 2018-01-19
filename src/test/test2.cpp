@@ -5,6 +5,7 @@
 #include <thread>
 #include <random>
 #include <time.h>
+#include <iostream>
 
 using namespace PhysxWrap;
 
@@ -28,5 +29,11 @@ void Test2() {
             scene.CreateSphereDynamic(Vector3{ x, y, z }, r);
             scene.CreateBoxStatic(Vector3{ x + 10, y + 10, z + 10 }, Vector3{ 1,1,1 });
         }
+        for (size_t i = 0; i < 5000; i++)
+        {
+            scene.Update(0.016f);
+        }
+
+        std::cout << ".";
     }
 }

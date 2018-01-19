@@ -1,6 +1,10 @@
 #include "util.h"
 #include <string>
 #include <fstream>
+#include <foundation/PxPreprocessor.h>
+#include <stdio.h>
+#include <assert.h>
+
 #if defined(_MSC_VER)
 #include <Windows.h>
 #else
@@ -38,5 +42,46 @@ namespace PhysxWrap {
         in.close();
         return std::move(ret);
     }
+
+#if defined(WIN32)
+    // on win32 we only have 8-byte alignment guaranteed, but the CRT provides special aligned allocation
+    // fns
+#include <malloc.h>
+#include <crtdbg.h>
+
+    void* platformAlignedAlloc(size_t size)
+    {
+        return _aligned_malloc(size, 16);
+    }
+
+    void platformAlignedFree(void* ptr)
+    {
+        _aligned_free(ptr);
+    }
+#elif PX_LINUX_FAMILY
+    void* platformAlignedAlloc(size_t size)
+    {
+        return ::memalign(16, size);
+    }
+
+    void platformAlignedFree(void* ptr)
+    {
+        ::free(ptr);
+    }
+#else
+
+    // on Win64 we get 16-byte alignment by default
+    void* platformAlignedAlloc(size_t size)
+    {
+        void *ptr = ::malloc(size);
+        PX_ASSERT((reinterpret_cast<size_t>(ptr) & 15) == 0);
+        return ptr;
+    }
+
+    void platformAlignedFree(void* ptr)
+    {
+        ::free(ptr);
+    }
+#endif
 
 }

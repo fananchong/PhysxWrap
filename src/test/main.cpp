@@ -20,7 +20,7 @@ int main(int argn, char *argv[]) {
 #endif
 
     //Test1();
-    //Test2();
-    Test3();
+    Test2();
+    //Test3();
     return 0;
 }

@@ -43,6 +43,12 @@
     DEFAULT_RIGID_DYNAMIC(ACTOR)                                                    \
     ACTOR->setActorFlag(physx::PxActorFlag::eVISUALIZATION, true);                  \
 
+#define SCRATCH_BLOCK_SIZE (1024 * 128)
+
+namespace PhysxWrap {
+    void* platformAlignedAlloc(size_t size);
+    void platformAlignedFree(void* ptr);
+}
 
 namespace PhysxWrap {
 
@@ -50,6 +56,7 @@ namespace PhysxWrap {
         : mScene(nullptr)
         , mCpuDispatcher(nullptr)
         , mMaterial(nullptr)
+        , mScratchBlock(nullptr)
         , mAngularDamping(0.5f)
     {
 
@@ -63,6 +70,7 @@ namespace PhysxWrap {
     }
 
     bool PhysxSceneImpl::Init() {
+        mScratchBlock = platformAlignedAlloc(SCRATCH_BLOCK_SIZE);
         mMaterial = gPhysxSDKImpl->GetPhysics()->createMaterial(0.5f, 0.5f, 1.0f);
         if (!mMaterial) {
             ERROR("[physx] createMaterial failed!");
@@ -118,14 +126,18 @@ namespace PhysxWrap {
         }
         SAFE_RELEASE(mScene);
         SAFE_RELEASE(mCpuDispatcher);
+        if (mScratchBlock != nullptr)
+        {
+            platformAlignedFree(mScratchBlock);
+            mScratchBlock = nullptr;
+        }
     }
 
     void PhysxSceneImpl::Update(float dtime) {
         if (mScene != nullptr) {
             SCENE_LOCK();
-            if (dtime > 0.0f)
-            {
-                mScene->simulate(dtime);
+            if (dtime > 0.0f) {
+                mScene->simulate(dtime, 0, mScratchBlock, SCRATCH_BLOCK_SIZE);
                 mScene->fetchResults();
             }
         }
