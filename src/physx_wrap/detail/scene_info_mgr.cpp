@@ -230,6 +230,10 @@ namespace PhysxWrap {
     }
 
     void SceneInfoMgr::Set(const std::string &path, const std::shared_ptr<SceneInfo> &scene) {
+        if (mScenes.find(path) != mScenes.end())
+        {
+            assert(false);
+        }
         mScenes[path] = scene;
     }
 
