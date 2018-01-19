@@ -2,6 +2,8 @@
 #include <string>
 #include <fstream>
 #include <foundation/PxPreprocessor.h>
+#include <stdio.h>
+#include <malloc.h>
 
 #if defined(_MSC_VER)
 #include <Windows.h>
@@ -57,32 +59,28 @@ namespace PhysxWrap {
         _aligned_free(ptr);
     }
 #elif PX_LINUX_FAMILY
-
-#include <stdio.h>
-#include <malloc.h>
-
     void* platformAlignedAlloc(size_t size)
     {
-        return memalign(16, size);
+        return ::memalign(16, size);
     }
 
     void platformAlignedFree(void* ptr)
     {
-        free(ptr);
+        ::free(ptr);
     }
 #else
 
     // on Win64 we get 16-byte alignment by default
     void* platformAlignedAlloc(size_t size)
     {
-        void *ptr = malloc(size);
+        void *ptr = ::malloc(size);
         PX_ASSERT((reinterpret_cast<size_t>(ptr) & 15) == 0);
         return ptr;
     }
 
     void platformAlignedFree(void* ptr)
     {
-        free(ptr);
+        ::free(ptr);
     }
 #endif
 
