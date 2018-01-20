@@ -1,10 +1,7 @@
 set CUR_PATH=%~dp0
 
 REM 设置VS路径
-set _devenv="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\devenv.com"
-
-REM 设置MSBuild路径
-set PATH=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\amd64;%PATH%
+set _devenv="devenv.com"
 
 REM 设置curl路径
 set _curl=%CUR_PATH%\..\..\tools\build\curl-win\curl.exe
