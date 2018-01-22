@@ -46,8 +46,7 @@
 #define SCRATCH_BLOCK_SIZE (1024 * 128)
 
 namespace PhysxWrap {
-    void* platformAlignedAlloc(size_t size);
-    void platformAlignedFree(void* ptr);
+    extern physx::PxDefaultAllocator gDefaultAllocatorCallback;
 }
 
 namespace PhysxWrap {
@@ -70,7 +69,7 @@ namespace PhysxWrap {
     }
 
     bool PhysxSceneImpl::Init() {
-        mScratchBlock = platformAlignedAlloc(SCRATCH_BLOCK_SIZE);
+        mScratchBlock = gDefaultAllocatorCallback.allocate(SCRATCH_BLOCK_SIZE, 0, 0, 0);
         mMaterial = gPhysxSDKImpl->GetPhysics()->createMaterial(0.5f, 0.5f, 1.0f);
         if (!mMaterial) {
             ERROR("[physx] createMaterial failed!");
@@ -128,7 +127,7 @@ namespace PhysxWrap {
         SAFE_RELEASE(mCpuDispatcher);
         if (mScratchBlock != nullptr)
         {
-            platformAlignedFree(mScratchBlock);
+            gDefaultAllocatorCallback.deallocate(mScratchBlock);
             mScratchBlock = nullptr;
         }
     }
@@ -137,7 +136,7 @@ namespace PhysxWrap {
         if (mScene != nullptr) {
             SCENE_LOCK();
             if (dtime > 0.0f) {
-                mScene->simulate(dtime, 0, mScratchBlock, mScratchBlock ? SCRATCH_BLOCK_SIZE : 0);
+                mScene->simulate(dtime, 0, mScratchBlock, mScratchBlock ? SCRATCH_BLOCK_SIZE : 0, false);
                 mScene->fetchResults();
             }
         }
