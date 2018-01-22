@@ -13,42 +13,38 @@
 extern "C" {
 #endif
 
-    typedef struct _Vector3 { float X; float Y; float Z; } Vector3;
-    typedef struct _Quat { float X; float Y;  float Z;  float W; } Quat;
-    typedef struct _PxScene { int _1; } *PxScene;
-
     DLLIMPORT int InitPhysxSDK();
-    DLLIMPORT PxScene CreateScene(const char *path);
-    DLLIMPORT void DestroyScene(PxScene scene);
-    DLLIMPORT void UpdateScene(PxScene scene, float elapsedTime); // second
+    DLLIMPORT void* CreateScene(const char *path);
+    DLLIMPORT void DestroyScene(void *scene);
+    DLLIMPORT void UpdateScene(void *scene, float elapsedTime); // second
 
-    DLLIMPORT UINT64 CreatePlane(PxScene scene, float yAxis);
-    DLLIMPORT UINT64 CreateBoxDynamic(PxScene scene, const Vector3* pos, const Vector3* halfExtents);
-    DLLIMPORT UINT64 CreateBoxKinematic(PxScene scene, const Vector3* pos, const Vector3* halfExtents);
-    DLLIMPORT UINT64 CreateBoxStatic(PxScene scene, const Vector3* pos, const Vector3* halfExtents);
-    DLLIMPORT UINT64 CreateSphereDynamic(PxScene scene, const Vector3* pos, float radius);
-    DLLIMPORT UINT64 CreateSphereKinematic(PxScene scene, const Vector3* pos, float radius);
-    DLLIMPORT UINT64 CreateSphereStatic(PxScene scene, const Vector3* pos, float radius);
-    DLLIMPORT UINT64 CreateCapsuleDynamic(PxScene scene, const Vector3* pos, float radius, float halfHeight);
-    DLLIMPORT UINT64 CreateCapsuleKinematic(PxScene scene, const Vector3* pos, float radius, float halfHeight);
-    DLLIMPORT UINT64 CreateCapsuleStatic(PxScene scene, const Vector3* pos, float radius, float halfHeight);
+    DLLIMPORT UINT64 CreatePlane(void *scene, float yAxis);
+    DLLIMPORT UINT64 CreateBoxDynamic(void *scene, float posX, float posY, float posZ, float halfExtentsX, float halfExtentsY, float halfExtentsZ);
+    DLLIMPORT UINT64 CreateBoxKinematic(void *scene, float posX, float posY, float posZ, float halfExtentsX, float halfExtentsY, float halfExtentsZ);
+    DLLIMPORT UINT64 CreateBoxStatic(void *scene, float posX, float posY, float posZ, float halfExtentsX, float halfExtentsY, float halfExtentsZ);
+    DLLIMPORT UINT64 CreateSphereDynamic(void *scene, float posX, float posY, float posZ, float radius);
+    DLLIMPORT UINT64 CreateSphereKinematic(void *scene, float posX, float posY, float posZ, float radius);
+    DLLIMPORT UINT64 CreateSphereStatic(void *scene, float posX, float posY, float posZ, float radius);
+    DLLIMPORT UINT64 CreateCapsuleDynamic(void *scene, float posX, float posY, float posZ, float radius, float halfHeight);
+    DLLIMPORT UINT64 CreateCapsuleKinematic(void *scene, float posX, float posY, float posZ, float radius, float halfHeight);
+    DLLIMPORT UINT64 CreateCapsuleStatic(void *scene, float posX, float posY, float posZ, float radius, float halfHeight);
 
-    DLLIMPORT void RemoveActor(PxScene scene, UINT64 id);
+    DLLIMPORT void RemoveActor(void *scene, UINT64 id);
 
-    DLLIMPORT void SetLinearVelocity(PxScene scene, UINT64 id, const Vector3* velocity);
-    DLLIMPORT void AddForce(PxScene scene, UINT64 id, const Vector3* force);
-    DLLIMPORT void ClearForce(PxScene scene, UINT64 id);
+    DLLIMPORT void SetLinearVelocity(void *scene, UINT64 id, float velocityX, float velocityY, float velocityZ);
+    DLLIMPORT void AddForce(void *scene, UINT64 id, float forceX, float forceY, float forceZ);
+    DLLIMPORT void ClearForce(void *scene, UINT64 id);
 
-    DLLIMPORT void GetGlobalPostion(PxScene scene, UINT64 id, Vector3* outPostion);
-    DLLIMPORT void GetGlobalRotate(PxScene scene, UINT64 id, Quat* outRotate);
-    DLLIMPORT void SetGlobalPostion(PxScene scene, UINT64 id, const Vector3* pos);
-    DLLIMPORT void SetGlobalRotate(PxScene scene, UINT64 id, const Quat* rotate);
+    DLLIMPORT void GetGlobalPostion(void *scene, UINT64 id, void *outPostionX, void *outPostionY, void *outPostionZ);
+    DLLIMPORT void GetGlobalRotate(void *scene, UINT64 id, void *outRotateX, void *outRotateY, void *outRotateZ, void *outRotateW);
+    DLLIMPORT void SetGlobalPostion(void *scene, UINT64 id, float posX, float posY, float posZ);
+    DLLIMPORT void SetGlobalRotate(void *scene, UINT64 id, float rotateX, float rotateY, float rotateZ, float rotateW);
 
-    DLLIMPORT int IsStaticObj(PxScene scene, UINT64 id);
-    DLLIMPORT int IsDynamicObj(PxScene scene, UINT64 id);
+    DLLIMPORT int IsStaticObj(void *scene, UINT64 id);
+    DLLIMPORT int IsDynamicObj(void *scene, UINT64 id);
 
-    DLLIMPORT void SetCurrentMaterial(PxScene scene, float staticFriction, float dynamicFriction, float restitution);
-    DLLIMPORT void SetCurrentAngularDamping(PxScene scene, float value);
+    DLLIMPORT void SetCurrentMaterial(void *scene, float staticFriction, float dynamicFriction, float restitution);
+    DLLIMPORT void SetCurrentAngularDamping(void *scene, float value);
 
 #ifdef __cplusplus
 }

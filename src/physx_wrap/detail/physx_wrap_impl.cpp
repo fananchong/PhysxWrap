@@ -137,7 +137,7 @@ namespace PhysxWrap {
         if (mScene != nullptr) {
             SCENE_LOCK();
             if (dtime > 0.0f) {
-                mScene->simulate(dtime, 0, mScratchBlock, SCRATCH_BLOCK_SIZE);
+                mScene->simulate(dtime, 0, mScratchBlock, mScratchBlock ? SCRATCH_BLOCK_SIZE : 0);
                 mScene->fetchResults();
             }
         }
