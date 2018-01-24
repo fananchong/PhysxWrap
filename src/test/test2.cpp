@@ -10,7 +10,7 @@
 using namespace PhysxWrap;
 
 
-#define DEFAULT_TEST_COUNT (100000)
+#define DEFAULT_TEST_COUNT (100)
 
 void Test2() {
     InitPhysxSDK();

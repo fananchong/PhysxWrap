@@ -12,3 +12,6 @@ docker run --rm -v $out_path:/tmp/home plengine/build-boost /bin/bash "/setup.sh
 docker build -t plengine/build-physx ./physx
 docker run --rm -v $out_path:/tmp/home plengine/build-physx /bin/bash "/setup.sh"
 
+docker build -t plengine/build-gperftools ./gperftools
+docker run --rm -v $out_path:/tmp/home plengine/build-gperftools /bin/bash "/setup.sh"
+

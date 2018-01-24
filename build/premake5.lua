@@ -71,6 +71,7 @@ project "test"
     kind "ConsoleApp"
     targetname "test"
     dependson { "PhysxWrap" }
+    defines { "ENABLE_PROFILER" }
     includedirs {
         "../src/physx_wrap/",
     }

@@ -1,6 +1,6 @@
 #include <random>
 #include <time.h>
-
+#include "profiler.h"
 
 #ifdef _MSC_VER
 #pragma comment(lib, "PhysxWrap.lib")
@@ -22,5 +22,10 @@ int main(int argn, char *argv[]) {
     //Test1();
     Test2();
     //Test3();
+
+#ifdef _DEBUG
+    Profiler::HeapProfilerDump("exit");
+#endif
+
     return 0;
 }
