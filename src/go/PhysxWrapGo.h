@@ -14,6 +14,7 @@ extern "C" {
 #endif
 
     DLLIMPORT int InitPhysxSDK();
+    DLLIMPORT void ReleasePhysxSDK();
     DLLIMPORT void* CreateScene(const char *path);
     DLLIMPORT void DestroyScene(void *scene);
     DLLIMPORT void UpdateScene(void *scene, float elapsedTime); // second

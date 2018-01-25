@@ -13,6 +13,10 @@ extern "C" {
         return PhysxWrap::InitPhysxSDK() ? 1 : 0;
     }
 
+    DLLIMPORT void ReleasePhysxSDK() {
+        PhysxWrap::ReleasePhysxSDK();
+    }
+
     DLLIMPORT void * CreateScene(const char *path) {
         auto s = new PhysxWrap::PhysxScene();
         if (s && s->Init()) {
