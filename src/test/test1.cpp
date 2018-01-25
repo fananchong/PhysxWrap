@@ -52,4 +52,5 @@ void Test1() {
         Vector3 pos = s.GetGlobalPostion(actor);
         std::cout << "(x, y, z) = (" << pos.X << "," << pos.Y << "," << pos.Z << ")" << std::endl;
     }
+    ReleasePhysxSDK();
 }

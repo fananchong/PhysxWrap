@@ -75,6 +75,7 @@ namespace PhysxWrap {
 
     MY_DLL_EXPORT_FUNC unsigned GetStaticObjCountInScene(const std::string &path);
     MY_DLL_EXPORT_FUNC bool InitPhysxSDK();
+    MY_DLL_EXPORT_FUNC void ReleasePhysxSDK();
 };
 
 #endif

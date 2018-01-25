@@ -39,7 +39,13 @@ workspace "PhysxWrap"
     end
     if os.is("linux") then
         buildoptions { "-fPIC -static-libgcc -static-libstdc++" }
-        linkoptions { "-Wl,--start-group -lPhysxWrap -lPhysX3_x64 -lPhysX3Cooking_x64 -lPhysX3CharacterKinematic_x64 -lSimulationController -lSceneQuery -lPxTask -lPxPvdSDK_x64 -lPxFoundation_x64 -lLowLevelParticles -lLowLevelDynamics -lLowLevelCloth -lLowLevelAABB -lLowLevel -lPhysX3Common_x64 -lPsFastXml -lPhysX3Extensions -Wl,--end-group" }
+        
+        
+        filter "configurations:Debug"
+            linkoptions { "-Wl,--start-group -lPhysxWrap -lPhysX3DEBUG_x64 -lPhysX3CookingDEBUG_x64 -lPhysX3CharacterKinematicDEBUG_x64 -lSimulationControllerDEBUG -lSceneQueryDEBUG -lPxTaskDEBUG -lPxPvdSDKDEBUG_x64 -lPxFoundationDEBUG_x64 -lLowLevelParticlesDEBUG -lLowLevelDynamicsDEBUG -lLowLevelClothDEBUG -lLowLevelAABBDEBUG -lLowLevelDEBUG -lPhysX3CommonDEBUG_x64 -lPsFastXmlDEBUG -lPhysX3ExtensionsDEBUG -Wl,--end-group" }
+        filter "configurations:Release"
+            linkoptions { "-Wl,--start-group -lPhysxWrap -lPhysX3_x64 -lPhysX3Cooking_x64 -lPhysX3CharacterKinematic_x64 -lSimulationController -lSceneQuery -lPxTask -lPxPvdSDK_x64 -lPxFoundation_x64 -lLowLevelParticles -lLowLevelDynamics -lLowLevelCloth -lLowLevelAABB -lLowLevel -lPhysX3Common_x64 -lPsFastXml -lPhysX3Extensions -Wl,--end-group" }
+        filter { }
         links{
             "pthread",
             "dl",
@@ -78,5 +84,9 @@ project "test"
     files {
         "../src/test/*.h",
         "../src/test/*.cpp",
+    }
+    links{
+        "profiler",
+        "tcmalloc",
     }
     

@@ -13,6 +13,10 @@ void Test3();
 
 int main(int argn, char *argv[]) {
 
+#ifdef _DEBUG
+    Profiler::HeapProfilerStart("test.pprof");
+#endif
+
 #ifdef _MSC_VER
     srand(unsigned int(time(0)));
 #else
@@ -25,6 +29,7 @@ int main(int argn, char *argv[]) {
 
 #ifdef _DEBUG
     Profiler::HeapProfilerDump("exit");
+    Profiler::HeapProfilerStop();
 #endif
 
     return 0;

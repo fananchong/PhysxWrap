@@ -12,7 +12,6 @@
 #include <gperftools/profiler.h>
 #endif
 
-
 void Profiler::Init()
 {
 }

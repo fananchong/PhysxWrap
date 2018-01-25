@@ -37,4 +37,5 @@ void Test3() {
 
         std::cout << ".";
     }
+    ReleasePhysxSDK();
 }

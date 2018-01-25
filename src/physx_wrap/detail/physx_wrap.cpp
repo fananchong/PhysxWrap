@@ -158,4 +158,8 @@ namespace PhysxWrap {
     MY_DLL_EXPORT_FUNC bool InitPhysxSDK() {
         return gPhysxSDKImpl->Init();
     }
+
+    MY_DLL_EXPORT_FUNC void ReleasePhysxSDK() {
+        gPhysxSDKImpl->Release();
+    }
 }

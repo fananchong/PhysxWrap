@@ -23,6 +23,7 @@ namespace PhysxWrap {
         ~PhysxSDKImpl();
 
         bool Init();
+        inline  void Release() { release(); }
 
         inline physx::PxFoundation* GetFoundation() { return mFoundation; }
         inline physx::PxPhysics* GetPhysics() { return mPhysicsSDK; }
