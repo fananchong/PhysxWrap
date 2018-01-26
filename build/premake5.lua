@@ -85,8 +85,10 @@ project "test"
         "../src/test/*.h",
         "../src/test/*.cpp",
     }
-    links{
-        "profiler",
-        "tcmalloc",
-    }
+    if os.is("linux") then
+        links{
+            "profiler",
+            "tcmalloc",
+        }
+    end
     
