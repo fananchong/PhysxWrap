@@ -65,7 +65,7 @@ PhysXCharacterKinematic_debug_defines   += PX_FOUNDATION_DLL=1
 PhysXCharacterKinematic_debug_defines   += _DEBUG
 PhysXCharacterKinematic_debug_defines   += PX_DEBUG=1
 PhysXCharacterKinematic_debug_defines   += PX_CHECKED=1
-PhysXCharacterKinematic_debug_defines   += PX_SUPPORT_PVD=1
+PhysXCharacterKinematic_debug_defines   += PX_SUPPORT_PVD=0
 PhysXCharacterKinematic_debug_libraries := 
 PhysXCharacterKinematic_debug_libraries += PhysX3CommonDEBUG_x64
 PhysXCharacterKinematic_debug_libraries += PhysX3ExtensionsDEBUG
@@ -173,7 +173,7 @@ PhysXCharacterKinematic_checked_defines   += PX_PHYSX_CORE_EXPORTS
 PhysXCharacterKinematic_checked_defines   += PX_FOUNDATION_DLL=1
 PhysXCharacterKinematic_checked_defines   += NDEBUG
 PhysXCharacterKinematic_checked_defines   += PX_CHECKED=1
-PhysXCharacterKinematic_checked_defines   += PX_SUPPORT_PVD=1
+PhysXCharacterKinematic_checked_defines   += PX_SUPPORT_PVD=0
 PhysXCharacterKinematic_checked_libraries := 
 PhysXCharacterKinematic_checked_libraries += PhysX3CommonCHECKED_x64
 PhysXCharacterKinematic_checked_libraries += PhysX3ExtensionsCHECKED
@@ -281,7 +281,7 @@ PhysXCharacterKinematic_profile_defines   += PX_PHYSX_CORE_EXPORTS
 PhysXCharacterKinematic_profile_defines   += PX_FOUNDATION_DLL=1
 PhysXCharacterKinematic_profile_defines   += NDEBUG
 PhysXCharacterKinematic_profile_defines   += PX_PROFILE=1
-PhysXCharacterKinematic_profile_defines   += PX_SUPPORT_PVD=1
+PhysXCharacterKinematic_profile_defines   += PX_SUPPORT_PVD=0
 PhysXCharacterKinematic_profile_libraries := 
 PhysXCharacterKinematic_profile_libraries += PhysX3CommonPROFILE_x64
 PhysXCharacterKinematic_profile_libraries += PhysX3ExtensionsPROFILE

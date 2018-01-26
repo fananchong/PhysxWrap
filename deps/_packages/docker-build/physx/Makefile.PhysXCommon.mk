@@ -301,7 +301,7 @@ PhysXCommon_debug_defines   += PX_PHYSX_COMMON_EXPORTS
 PhysXCommon_debug_defines   += _DEBUG
 PhysXCommon_debug_defines   += PX_DEBUG=1
 PhysXCommon_debug_defines   += PX_CHECKED=1
-PhysXCommon_debug_defines   += PX_SUPPORT_PVD=1
+PhysXCommon_debug_defines   += PX_SUPPORT_PVD=0
 PhysXCommon_debug_libraries := 
 PhysXCommon_debug_libraries += PxFoundationDEBUG_x64
 PhysXCommon_debug_common_cflags	:= $(PhysXCommon_custom_cflags)
@@ -410,7 +410,7 @@ PhysXCommon_checked_defines   += PX_FOUNDATION_DLL=1
 PhysXCommon_checked_defines   += PX_PHYSX_COMMON_EXPORTS
 PhysXCommon_checked_defines   += NDEBUG
 PhysXCommon_checked_defines   += PX_CHECKED=1
-PhysXCommon_checked_defines   += PX_SUPPORT_PVD=1
+PhysXCommon_checked_defines   += PX_SUPPORT_PVD=0
 PhysXCommon_checked_libraries := 
 PhysXCommon_checked_libraries += PxFoundationCHECKED_x64
 PhysXCommon_checked_common_cflags	:= $(PhysXCommon_custom_cflags)
@@ -519,7 +519,7 @@ PhysXCommon_profile_defines   += PX_FOUNDATION_DLL=1
 PhysXCommon_profile_defines   += PX_PHYSX_COMMON_EXPORTS
 PhysXCommon_profile_defines   += NDEBUG
 PhysXCommon_profile_defines   += PX_PROFILE=1
-PhysXCommon_profile_defines   += PX_SUPPORT_PVD=1
+PhysXCommon_profile_defines   += PX_SUPPORT_PVD=0
 PhysXCommon_profile_libraries := 
 PhysXCommon_profile_libraries += PxFoundationPROFILE_x64
 PhysXCommon_profile_common_cflags	:= $(PhysXCommon_custom_cflags)

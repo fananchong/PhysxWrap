@@ -272,7 +272,7 @@ PhysX_debug_defines   += PX_PHYSX_CORE_EXPORTS
 PhysX_debug_defines   += _DEBUG
 PhysX_debug_defines   += PX_DEBUG=1
 PhysX_debug_defines   += PX_CHECKED=1
-PhysX_debug_defines   += PX_SUPPORT_PVD=1
+PhysX_debug_defines   += PX_SUPPORT_PVD=0
 PhysX_debug_defines   += PX_PHYSX_DLL_NAME_POSTFIX=DEBUG
 PhysX_debug_libraries := 
 PhysX_debug_libraries += LowLevelDEBUG
@@ -416,7 +416,7 @@ PhysX_checked_defines   := $(PhysX_custom_defines)
 PhysX_checked_defines   += PX_PHYSX_CORE_EXPORTS
 PhysX_checked_defines   += NDEBUG
 PhysX_checked_defines   += PX_CHECKED=1
-PhysX_checked_defines   += PX_SUPPORT_PVD=1
+PhysX_checked_defines   += PX_SUPPORT_PVD=0
 PhysX_checked_defines   += PX_PHYSX_DLL_NAME_POSTFIX=CHECKED
 PhysX_checked_libraries := 
 PhysX_checked_libraries += LowLevelCHECKED
@@ -560,7 +560,7 @@ PhysX_profile_defines   := $(PhysX_custom_defines)
 PhysX_profile_defines   += PX_PHYSX_CORE_EXPORTS
 PhysX_profile_defines   += NDEBUG
 PhysX_profile_defines   += PX_PROFILE=1
-PhysX_profile_defines   += PX_SUPPORT_PVD=1
+PhysX_profile_defines   += PX_SUPPORT_PVD=0
 PhysX_profile_defines   += PX_PHYSX_DLL_NAME_POSTFIX=PROFILE
 PhysX_profile_libraries := 
 PhysX_profile_libraries += LowLevelPROFILE

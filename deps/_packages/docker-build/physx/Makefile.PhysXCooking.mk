@@ -201,7 +201,7 @@ PhysXCooking_debug_defines   += PX_COOKING
 PhysXCooking_debug_defines   += _DEBUG
 PhysXCooking_debug_defines   += PX_DEBUG=1
 PhysXCooking_debug_defines   += PX_CHECKED=1
-PhysXCooking_debug_defines   += PX_SUPPORT_PVD=1
+PhysXCooking_debug_defines   += PX_SUPPORT_PVD=0
 PhysXCooking_debug_libraries := 
 PhysXCooking_debug_libraries += PhysX3CommonDEBUG_x64
 PhysXCooking_debug_libraries += PhysX3ExtensionsDEBUG
@@ -319,7 +319,7 @@ PhysXCooking_checked_defines   += PX_PHYSX_CORE_EXPORTS
 PhysXCooking_checked_defines   += PX_COOKING
 PhysXCooking_checked_defines   += NDEBUG
 PhysXCooking_checked_defines   += PX_CHECKED=1
-PhysXCooking_checked_defines   += PX_SUPPORT_PVD=1
+PhysXCooking_checked_defines   += PX_SUPPORT_PVD=0
 PhysXCooking_checked_libraries := 
 PhysXCooking_checked_libraries += PhysX3CommonCHECKED_x64
 PhysXCooking_checked_libraries += PhysX3ExtensionsCHECKED
@@ -437,7 +437,7 @@ PhysXCooking_profile_defines   += PX_PHYSX_CORE_EXPORTS
 PhysXCooking_profile_defines   += PX_COOKING
 PhysXCooking_profile_defines   += NDEBUG
 PhysXCooking_profile_defines   += PX_PROFILE=1
-PhysXCooking_profile_defines   += PX_SUPPORT_PVD=1
+PhysXCooking_profile_defines   += PX_SUPPORT_PVD=0
 PhysXCooking_profile_libraries := 
 PhysXCooking_profile_libraries += PhysX3CommonPROFILE_x64
 PhysXCooking_profile_libraries += PhysX3ExtensionsPROFILE
