@@ -2,7 +2,7 @@ call _load_env.bat
 
 set CURDIR=%~dp0
 
-#if exist PhysX-3.4-master.zip %_7z% x PhysX-3.4-master.zip -y -aos -o"."
+if exist PhysX-3.4-master.zip %_7z% x PhysX-3.4-master.zip -y -aos -o"."
 
 cd %CURDIR%\PhysX-3.4-master\PhysX_3.4\Source\compiler\vc14win64
 
